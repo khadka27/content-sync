@@ -1,0 +1,238 @@
+// Prisma Schema for ContentPilot AI (PostgreSQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  EDITOR
+  AUTHOR
+  VIEWER
+}
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  FAILED
+  NEEDS_APPROVAL
+}
+
+enum Platform {
+  FACEBOOK
+  INSTAGRAM
+  LINKEDIN
+  TWITTER
+  THREADS
+  PINTEREST
+  TELEGRAM
+  DISCORD
+}
+
+enum AutomationType {
+  RSS
+  WORDPRESS
+  WEBHOOK
+  MANUAL_URL
+}
+
+enum Tone {
+  PROFESSIONAL
+  MARKETING
+  EDUCATIONAL
+  FRIENDLY
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  avatar        String?
+  role          Role           @default(OWNER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  workspaces    Workspace[]
+  teamMembers   TeamMember[]
+  notifications Notification[]
+  subscriptions Subscription[]
+}
+
+model Workspace {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  ownerId     String
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  websites    Website[]
+  teamMembers TeamMember[]
+  posts       Post[]
+  media       Media[]
+}
+
+model Website {
+  id            String          @id @default(cuid())
+  workspaceId   String
+  workspace     Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name          String
+  domain        String
+  logo          String?
+  brandColor    String          @default("#3b82f6")
+  description   String?
+  timezone      String          @default("UTC")
+  language      String          @default("en")
+  rssFeed       String?
+  wordpressApi  String?
+  webhookUrl    String?
+  status        String          @default("ACTIVE")
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  socialAccounts SocialAccount[]
+  posts         Post[]
+  automations   Automation[]
+  analytics     Analytics[]
+  brandSettings BrandSettings?
+}
+
+model SocialAccount {
+  id          String   @id @default(cuid())
+  websiteId   String
+  website     Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  platform    Platform
+  accountName String
+  handle      String?
+  avatar      String?
+  accessToken String?
+  connected   Boolean  @default(true)
+  followers   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([websiteId, platform])
+}
+
+model Post {
+  id              String       @id @default(cuid())
+  workspaceId     String
+  workspace       Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  websiteId       String
+  website         Website      @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  title           String
+  originalUrl     String?
+  summary         String?
+  tone            Tone         @default(PROFESSIONAL)
+  platforms       Platform[]
+  platformCopies  Json?        // { FACEBOOK: "...", TWITTER: "..." }
+  hashtags        String[]
+  cta             String?
+  emojis          Boolean      @default(true)
+  mediaUrls       String[]
+  status          PostStatus   @default(DRAFT)
+  scheduledAt     DateTime?
+  publishedAt     DateTime?
+  errorMessage    String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  schedules       Schedule[]
+}
+
+model Schedule {
+  id          String   @id @default(cuid())
+  postId      String
+  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  cronExpr    String?
+  recurring   Boolean  @default(false)
+  nextRun     DateTime
+  createdAt   DateTime @default(now())
+}
+
+model Automation {
+  id          String         @id @default(cuid())
+  websiteId   String
+  website     Website        @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  name        String
+  type        AutomationType
+  targetUrl   String?
+  autoPublish Boolean        @default(false)
+  defaultTone Tone           @default(MARKETING)
+  active      Boolean        @default(true)
+  lastSynced  DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Media {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  url         String
+  folder      String    @default("General")
+  type        String    // IMAGE, VIDEO, BRAND, AI_GENERATED
+  size        Int?
+  createdAt   DateTime  @default(now())
+}
+
+model Analytics {
+  id          String   @id @default(cuid())
+  websiteId   String
+  website     Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  platform    Platform
+  postsCount  Int      @default(0)
+  impressions Int      @default(0)
+  reach       Int      @default(0)
+  clicks      Int      @default(0)
+  ctr         Float    @default(0.0)
+  date        DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  type      String   @default("INFO")
+  createdAt DateTime @default(now())
+}
+
+model TeamMember {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        Role      @default(EDITOR)
+  status      String    @default("ACTIVE")
+  createdAt   DateTime  @default(now())
+}
+
+model Subscription {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan           String   @default("PRO") // FREE, PRO, AGENCY
+  status         String   @default("ACTIVE")
+  aiCreditsTotal Int      @default(1000)
+  aiCreditsUsed  Int      @default(0)
+  currentPeriodEnd DateTime
+  createdAt      DateTime @default(now())
+}
+
+model BrandSettings {
+  id          String   @id @default(cuid())
+  websiteId   String   @unique
+  website     Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  defaultTone Tone     @default(PROFESSIONAL)
+  hashtags    String[]
+  ctaText     String?
+  logoWatermark Boolean @default(false)
+}
