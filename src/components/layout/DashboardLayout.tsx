@@ -72,7 +72,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { label: 'Team', path: '/dashboard/team', icon: Users },
     { label: 'Billing & Usage', path: '/dashboard/billing', icon: CreditCard },
     { label: 'Settings', path: '/dashboard/settings', icon: Settings },
-    { label: 'Super Admin', path: '/dashboard/admin', icon: ShieldAlert },
   ];
 
   return (

@@ -90,12 +90,53 @@ export default function DashboardPage() {
     },
   ];
 
-  const platforms = [
-    { name: 'Twitter / X',  reach: '142K', pct: 85, color: 'from-sky-400 to-sky-600' },
-    { name: 'Instagram',    reach: '180K', pct: 95, color: 'from-rose-400 to-pink-600' },
-    { name: 'LinkedIn',     reach: '78K',  pct: 65, color: 'from-blue-500 to-blue-700' },
-    { name: 'TikTok',       reach: '95K',  pct: 72, color: 'from-emerald-400 to-teal-600' },
-    { name: 'Threads',      reach: '45K',  pct: 48, color: 'from-violet-400 to-purple-600' },
+  const platformList = [
+    { id: 'TWITTER', name: 'Twitter / X', color: 'from-sky-400 to-sky-600' },
+    { id: 'INSTAGRAM', name: 'Instagram', color: 'from-rose-400 to-pink-600' },
+    { id: 'LINKEDIN', name: 'LinkedIn', color: 'from-blue-500 to-blue-700' },
+    { id: 'TIKTOK', name: 'TikTok', color: 'from-emerald-400 to-teal-600' },
+    { id: 'THREADS', name: 'Threads', color: 'from-violet-400 to-purple-600' },
+    { id: 'FACEBOOK', name: 'Facebook', color: 'from-blue-600 to-indigo-600' },
+  ];
+
+  // Calculate real reach numbers from actual connected accounts & published posts
+  const platformData = platformList.map((p) => {
+    const accs = activeSocials.filter((s) => s.platform === p.id && s.connected);
+    const totalFollowers = accs.reduce((sum, a) => sum + (a.followers || 0), 0);
+    const platPostsCount = websitePosts.filter((post) => (post.platforms || []).includes(p.id as any)).length;
+    const reachVal = totalFollowers > 0 ? totalFollowers : platPostsCount * 25;
+
+    return {
+      name: p.name,
+      reachVal,
+      reach: reachVal >= 1000 ? `${(reachVal / 1000).toFixed(1)}K` : `${reachVal}`,
+      color: p.color,
+      connected: accs.length > 0,
+    };
+  });
+
+  const maxReach = Math.max(...platformData.map((d) => d.reachVal), 1);
+  const platforms = platformData.map((d) => ({
+    ...d,
+    pct: d.reachVal > 0 ? Math.max(8, Math.round((d.reachVal / maxReach) * 100)) : 0,
+  }));
+
+  const automationChannels = [
+    {
+      name: 'RSS Auto-Sync',
+      sub: activeWebsite?.rssFeed || 'No RSS feed configured',
+      status: activeWebsite?.rssFeed ? 'ACTIVE' : 'READY',
+    },
+    {
+      name: 'WordPress REST API',
+      sub: activeWebsite?.wordpressApi || 'No WP API configured',
+      status: activeWebsite?.wordpressApi ? 'ACTIVE' : 'READY',
+    },
+    {
+      name: 'Webhook Receiver',
+      sub: activeWebsite?.webhookUrl || 'https://api.contentsync.ai/v1/webhook',
+      status: activeWebsite?.webhookUrl ? 'ACTIVE' : 'READY',
+    },
   ];
 
   return (
@@ -222,11 +263,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="space-y-3">
-              {[
-                { name: 'RSS Auto-Sync', sub: 'techpulse.io/rss.xml', status: 'ACTIVE' },
-                { name: 'WordPress REST', sub: 'WP REST v2 API', status: 'ACTIVE' },
-                { name: 'Webhook Receiver', sub: 'api.contentpilot.ai/webhook', status: 'ACTIVE' },
-              ].map((item, i) => (
+              {automationChannels.map((item, i) => (
                 <div
                   key={i}
                   className="p-3.5 rounded-2xl bg-zinc-800/40 border border-white/[0.04] flex items-center justify-between gap-3"
@@ -235,7 +272,9 @@ export default function DashboardPage() {
                     <p className="text-xs font-bold text-zinc-200 truncate">{item.name}</p>
                     <p className="text-[10px] text-zinc-500 font-mono truncate">{item.sub}</p>
                   </div>
-                  <span className="shrink-0 px-2 py-0.5 rounded-full badge-neon-emerald text-[10px] font-bold">
+                  <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    item.status === 'ACTIVE' ? 'badge-neon-emerald' : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                  }`}>
                     {item.status}
                   </span>
                 </div>

@@ -20,7 +20,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.rewrite(url);
   }
 
-  // 2. NextAuth Session Verification
+  // 2. NextAuth & Admin Session Verification
   const token = await getToken({ req: request, secret: NEXTAUTH_SECRET });
   const hasNextAuthCookie =
     request.cookies.has('next-auth.session-token') ||
@@ -28,8 +28,12 @@ export async function proxy(request: NextRequest) {
     request.cookies.has('contentsync_session');
 
   const isAuthenticated = !!token || hasNextAuthCookie;
+  const isAdminAuthenticated =
+    request.cookies.has('contentsync_admin_token') ||
+    token?.email === 'admin@contentsync.ai' ||
+    (token as any)?.role === 'ADMIN';
 
-  // 3. Protected Dashboard Routes Check
+  // 3. Protected Dashboard Routes Check (for regular users)
   if (pathname.startsWith('/dashboard')) {
     if (!isAuthenticated) {
       const loginUrl = new URL('/login', request.url);
@@ -38,12 +42,26 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // 4. If already authenticated and visits / or /login, redirect to /dashboard
+  // 4. Protected Admin Portal Routes Check (for Super Admins)
+  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
+    if (!isAdminAuthenticated) {
+      const adminLoginUrl = new URL('/admin/login', request.url);
+      adminLoginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname);
+      return NextResponse.redirect(adminLoginUrl);
+    }
+  }
+
+  // 5. If already authenticated as Admin visiting /admin/login, redirect to /admin
+  if (pathname === '/admin/login' && isAdminAuthenticated) {
+    return NextResponse.redirect(new URL('/admin', request.url));
+  }
+
+  // 6. If already authenticated as User visiting / or /login, redirect to /dashboard
   if ((pathname === '/' || pathname === '/login') && isAuthenticated) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // 5. CORS Headers for API & Proxy requests
+  // 7. CORS Headers for API & Proxy requests
   const response = NextResponse.next();
   if (pathname.startsWith('/api') || pathname.startsWith('/proxy')) {
     response.headers.set('Access-Control-Allow-Origin', '*');
@@ -57,5 +75,5 @@ export async function proxy(request: NextRequest) {
 export default proxy;
 
 export const config = {
-  matcher: ['/', '/dashboard/:path*', '/login', '/api/:path*', '/proxy', '/proxy-image'],
+  matcher: ['/', '/dashboard/:path*', '/login', '/admin/:path*', '/api/:path*', '/proxy', '/proxy-image'],
 };
