@@ -12,7 +12,7 @@ export async function POST(req: Request) {
       return NextResponse.json({
         success: true,
         data: {
-          reelScript: `🎬 [INSTAGRAM REEL SCRIPT]\n\n[HOOK (0-3s)]: "Stop scrolling! Here's why ${title || 'this strategy'} will change your workflow in 2026."\n\n[SCENE 1 (3-15s)]: Show screen capture of modern dashboard.\nVoiceover: "${content ? content.slice(0, 100) : 'Engineers are leveraging multi-agent workflows to automate 80% of routine tasks.'}"\n\n[SCENE 2 (15-30s)]: Text overlay with 3 key points:\n1. Zero friction setup\n2. Real-time multi-platform sync\n3. High conversion output\n\n[CTA (30-45s)]: "Link in bio to test ContentPilot AI for free today! 🔥"`,
+          reelScript: `🎬 [INSTAGRAM REEL SCRIPT]\n\n[HOOK (0-3s)]: "Stop scrolling! Here's why ${title || 'this strategy'} will change your workflow in 2026."\n\n[SCENE 1 (3-15s)]: Show screen capture of modern dashboard.\nVoiceover: "${content ? content.slice(0, 100) : 'Engineers are leveraging multi-agent workflows to automate 80% of routine tasks.'}"\n\n[SCENE 2 (15-30s)]: Text overlay with 3 key points:\n1. Zero friction setup\n2. Real-time multi-platform sync\n3. High conversion output\n\n[CTA (30-45s)]: "Link in bio to test Content Sync for free today! 🔥"`,
           shortsScript: `⚡ [YOUTUBE SHORTS SCRIPT]\n\n[0-5s]: "Did you know ${title || 'AI automation'} can save you 15 hours every week?"\n\n[5-25s]: Fast-paced visual cut of analytics chart spiking upwards.\nNarration: "Instead of manually writing posts for X, LinkedIn, and Instagram, auto-convert your blog posts into high-engaging carousel slides and video scripts in 1 click."\n\n[25-60s]: "Drop a comment with your biggest growth challenge and subscribe for daily breakdowns!"`,
         },
       });
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
             { slideNumber: 2, title: '1. Automated Scraper', text: 'Import any article URL and instantly extract high-value insights.' },
             { slideNumber: 3, title: '2. Multi-Tone Adaptation', text: `Switch seamlessly between Professional, Marketing, and Friendly tones.` },
             { slideNumber: 4, title: '3. Platform Custom Copies', text: 'Tailored copy formatting for X, LinkedIn, Threads, Instagram, and Discord.' },
-            { slideNumber: 5, title: 'Summary & Key Action', text: 'Start automating your content workflow with ContentPilot AI today!' },
+            { slideNumber: 5, title: 'Summary & Key Action', text: 'Start automating your content workflow with Content Sync today!' },
           ],
         },
       });
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
         success: true,
         data: {
           quoteText: `"${content ? content.slice(0, 120) : 'Automation isn’t about doing less work; it’s about creating more space for high-impact innovation.'}"`,
-          author: websiteName || 'ContentPilot AI',
+          author: websiteName || 'Content Sync',
           designPreset: 'Dark Glassmorphic Minimal',
         },
       });

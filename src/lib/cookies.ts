@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 
-export const COOKIE_SESSION_KEY = 'contentpilot_session';
-export const COOKIE_WEBSITE_KEY = 'contentpilot_active_website';
+export const COOKIE_SESSION_KEY = 'contentsync_session';
+export const COOKIE_WEBSITE_KEY = 'contentsync_active_website';
 
 export async function setSessionCookie(userId: string, email: string) {
   const cookieStore = await cookies();

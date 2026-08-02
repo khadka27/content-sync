@@ -150,7 +150,7 @@ export default function AiLabPage() {
                         { slideNumber: 2, title: '1. Autonomous Agents', text: 'Multi-step event-driven orchestration.' },
                         { slideNumber: 3, title: '2. Zero-Trust Sandboxes', text: 'Deterministic code execution isolation.' },
                         { slideNumber: 4, title: '3. Real-Time Sync', text: 'Instantaneous multi-channel distribution.' },
-                        { slideNumber: 5, title: 'Summary', text: 'Start building with ContentPilot AI today!' },
+                        { slideNumber: 5, title: 'Summary', text: 'Start building with Content Sync today!' },
                       ]
                   ).map((slide) => (
                     <div
@@ -206,7 +206,7 @@ export default function AiLabPage() {
 
                 <div className="p-6 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs font-mono text-zinc-300 whitespace-pre-wrap leading-relaxed">
                   {scriptsOutput?.reelScript ||
-                    `🎬 [INSTAGRAM REEL / SHORTS SCRIPT]\n\n[HOOK (0-3s)]: "Stop scrolling! Here's why ${topic} will change your workflow in 2026."\n\n[SCENE 1 (3-15s)]: Show screen capture of modern dashboard.\nVoiceover: "Engineers are leveraging multi-agent workflows to automate 80% of routine tasks."\n\n[SCENE 2 (15-30s)]: Text overlay with 3 key points:\n1. Zero friction setup\n2. Real-time multi-platform sync\n3. High conversion output\n\n[CTA (30-45s)]: "Link in bio to test ContentPilot AI for free today! 🔥"`}
+                    `🎬 [INSTAGRAM REEL / SHORTS SCRIPT]\n\n[HOOK (0-3s)]: "Stop scrolling! Here's why ${topic} will change your workflow in 2026."\n\n[SCENE 1 (3-15s)]: Show screen capture of modern dashboard.\nVoiceover: "Engineers are leveraging multi-agent workflows to automate 80% of routine tasks."\n\n[SCENE 2 (15-30s)]: Text overlay with 3 key points:\n1. Zero friction setup\n2. Real-time multi-platform sync\n3. High conversion output\n\n[CTA (30-45s)]: "Link in bio to test Content Sync for free today! 🔥"`}
                 </div>
               </div>
             )}

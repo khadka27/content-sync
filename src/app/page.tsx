@@ -264,7 +264,16 @@ export default function Home() {
       </main>
 
       {/* ── Footer ───────────────────────────────────────────── */}
-          <div className="flex flex-wrap items-center gap-6 text-zinc-400">
+      <footer className="border-t border-white/[0.06] py-12 glass">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black text-xs">
+              CS
+            </div>
+            <span className="font-bold text-zinc-300 text-sm">Content Sync</span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-6 text-xs text-zinc-400">
             {[
               { label: 'Dashboard', href: '/dashboard' },
               { label: 'Post Studio', href: '/dashboard/posts' },
@@ -279,7 +288,7 @@ export default function Home() {
           </div>
 
           <div className="text-zinc-600 font-mono text-[11px]">
-            &copy; {new Date().getFullYear()} ContentPilot AI Inc.
+            &copy; {new Date().getFullYear()} Content Sync Inc. All rights reserved.
           </div>
         </div>
       </footer>

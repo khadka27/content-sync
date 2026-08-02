@@ -186,7 +186,7 @@ function AddAccountModal({ platform, websiteId, onClose }: AddAccountModalProps)
             <p className="text-xs font-bold text-blue-200">Secure OAuth 2.0 Only</p>
           </div>
           <p className="text-[11px] text-zinc-400 leading-relaxed">
-            You will be redirected to <span className="text-zinc-200 font-semibold">{meta.label}</span> to authorize ContentPilot AI. Only a secure access token is stored - never your password.
+            You will be redirected to <span className="text-zinc-200 font-semibold">{meta.label}</span> to authorize Content Sync. Only a secure access token is stored — never your password.
           </p>
           <ul className="text-[11px] text-zinc-500 space-y-0.5 pt-1">
             <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-emerald-400" />No passwords stored</li>

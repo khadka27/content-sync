@@ -26,7 +26,7 @@ export const authOptions: NextAuthOptions = {
 
         // Demo login & standard auth handling
         if (
-          credentials.email === 'alex@contentpilot.ai' ||
+          credentials.email === 'alex@contentsync.ai' ||
           credentials.email.endsWith('@company.com') ||
           credentials.password.length >= 6
         ) {
@@ -65,7 +65,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET || 'contentpilot-ai-super-secret-key-2026',
+  secret: process.env.NEXTAUTH_SECRET || 'content-sync-super-secret-key-2026',
 };
 
 const handler = NextAuth(authOptions);

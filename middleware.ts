@@ -19,16 +19,16 @@ export function middleware(request: NextRequest) {
 
   // 2. Cookie & Session Proxying
   const response = NextResponse.next();
-  const sessionCookie = request.cookies.get('contentpilot_session');
+  const sessionCookie = request.cookies.get('contentsync_session');
 
   // Inject default session cookie for dashboard access if missing
   if (pathname.startsWith('/dashboard') && !sessionCookie) {
     const defaultSession = JSON.stringify({
       userId: 'usr-default',
-      email: 'khadka@contentpilot.ai',
+      email: 'khadka@contentsync.ai',
       loggedInAt: new Date().toISOString(),
     });
-    response.cookies.set('contentpilot_session', defaultSession, {
+    response.cookies.set('contentsync_session', defaultSession, {
       httpOnly: true,
       path: '/',
       maxAge: 60 * 60 * 24 * 30,

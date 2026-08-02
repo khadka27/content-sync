@@ -84,9 +84,9 @@ export const useStore = create<StoreState>((set, get) => ({
   posts: [],
   media: [],
   analytics: [],
-  teamMembers: initialTeamMembers,
+  teamMembers: [],
   automations: [],
-  notifications: initialNotifications,
+  notifications: [],
   subscription: initialSubscription,
   commandPaletteOpen: false,
   isLoading: false,
@@ -94,19 +94,22 @@ export const useStore = create<StoreState>((set, get) => ({
   fetchInitialData: async () => {
     set({ isLoading: true });
     try {
-      const [webRes, postsRes] = await Promise.all([
+      const [webRes, postsRes, teamRes] = await Promise.all([
         fetch('/api/websites').then((r) => r.json()),
         fetch('/api/posts').then((r) => r.json()),
+        fetch('/api/team').then((r) => r.json()),
       ]);
 
       const fetchedWebsites: Website[] = webRes.success ? webRes.data : [];
       const fetchedPosts: Post[] = postsRes.success ? postsRes.data : [];
+      const fetchedTeam: TeamMember[] = teamRes.success ? teamRes.data : [];
 
       const nextActiveId = fetchedWebsites[0]?.id || '';
 
       set({
         websites: fetchedWebsites,
         posts: fetchedPosts,
+        teamMembers: fetchedTeam,
         activeWebsiteId: nextActiveId,
         isLoading: false,
       });

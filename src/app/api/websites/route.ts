@@ -78,20 +78,6 @@ export async function POST(req: Request) {
       },
     });
 
-    // Create default social platform entries for new website in DB
-    const platforms: Platform[] = ['TWITTER', 'LINKEDIN', 'FACEBOOK', 'INSTAGRAM', 'THREADS', 'PINTEREST', 'TELEGRAM', 'DISCORD'];
-    for (const plat of platforms) {
-      await prisma.socialAccount.create({
-        data: {
-          websiteId: created.id,
-          platform: plat,
-          accountName: `@${name.replace(/\s+/g, '')}`,
-          connected: plat === 'TWITTER' || plat === 'LINKEDIN' || plat === 'INSTAGRAM',
-          followers: Math.floor(Math.random() * 500) + 50,
-        },
-      });
-    }
-
     return NextResponse.json({ success: true, data: created }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error?.message || 'Failed to create website profile.' }, { status: 500 });

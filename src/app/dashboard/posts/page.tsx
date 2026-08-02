@@ -179,7 +179,7 @@ export default function PostsPage() {
       platformCopies: platformCopies as Record<Platform, string>,
       targetAccountIds: allTargetAccountIds.length > 0 ? allTargetAccountIds : undefined,
       hashtags: ['#AI', '#Automation', '#Growth2026'],
-      cta: 'Learn more on ContentPilot AI',
+      cta: 'Learn more on Content Sync',
       emojis: true,
       mediaUrls: selectedMedia,
       status,

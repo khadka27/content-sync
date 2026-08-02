@@ -69,13 +69,13 @@ function LoginForm() {
   };
 
   const handleDemoLogin = async () => {
-    setEmail('alex@contentpilot.ai');
+    setEmail('alex@contentsync.ai');
     setPassword('demo123456');
     setIsLoading(true);
     setErrorMessage(null);
 
     const res = await signIn('credentials', {
-      email: 'alex@contentpilot.ai',
+      email: 'alex@contentsync.ai',
       password: 'demo123456',
       redirect: false,
       callbackUrl,

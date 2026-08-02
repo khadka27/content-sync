@@ -65,29 +65,39 @@ export default function MediaPage() {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredMedia.map((item) => (
-            <div
-              key={item.id}
-              className="group rounded-3xl bg-zinc-900/90 border border-zinc-800 overflow-hidden space-y-3 p-3 hover:border-zinc-700 transition"
-            >
-              <div className="aspect-video rounded-2xl overflow-hidden relative bg-zinc-950">
-                <img src={item.url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-                <button
-                  onClick={() => deleteMedia(item.id)}
-                  className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-rose-400 hover:bg-rose-600 hover:text-white transition opacity-0 group-hover:opacity-100"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
+        {filteredMedia.length === 0 ? (
+          <div className="p-12 rounded-3xl bg-zinc-900/60 border border-zinc-800 text-center space-y-3">
+            <FileImage className="w-10 h-10 text-zinc-600 mx-auto" />
+            <h3 className="text-sm font-bold text-zinc-300">No Media Assets Found</h3>
+            <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+              You haven't uploaded any media items yet. Click the upload button above to add image or video URLs to your asset library.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {filteredMedia.map((item) => (
+              <div
+                key={item.id}
+                className="group rounded-3xl bg-zinc-900/90 border border-zinc-800 overflow-hidden space-y-3 p-3 hover:border-zinc-700 transition"
+              >
+                <div className="aspect-video rounded-2xl overflow-hidden relative bg-zinc-950">
+                  <img src={item.url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                  <button
+                    onClick={() => deleteMedia(item.id)}
+                    className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-rose-400 hover:bg-rose-600 hover:text-white transition opacity-0 group-hover:opacity-100"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
 
-              <div className="flex items-center justify-between text-xs px-1">
-                <span className="font-bold text-zinc-200 truncate max-w-[160px]">{item.name}</span>
-                <span className="text-[10px] font-mono text-zinc-500">{item.folder}</span>
+                <div className="flex items-center justify-between text-xs px-1">
+                  <span className="font-bold text-zinc-200 truncate max-w-[160px]">{item.name}</span>
+                  <span className="text-[10px] font-mono text-zinc-500">{item.folder}</span>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Modal */}
         {modalOpen && (
