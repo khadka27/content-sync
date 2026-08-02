@@ -4,7 +4,7 @@ import { getToken } from 'next-auth/jwt';
 
 const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET || 'content-sync-super-secret-key-2026';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
   // 1. Proxy Rewrites
@@ -53,6 +53,8 @@ export async function middleware(request: NextRequest) {
 
   return response;
 }
+
+export default proxy;
 
 export const config = {
   matcher: ['/dashboard/:path*', '/login', '/api/:path*', '/proxy', '/proxy-image'],

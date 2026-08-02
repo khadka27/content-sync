@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import { CommandPalette } from '@/components/CommandPalette';
 import { useTheme } from 'next-themes';
+import { useSession, signOut } from 'next-auth/react';
 import {
   LayoutDashboard,
   Globe,
@@ -30,9 +31,11 @@ import {
   Menu,
   X,
   ExternalLink,
+  LogOut,
 } from 'lucide-react';
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { data: session } = useSession();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const {
@@ -337,12 +340,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               {theme === 'dark' ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5" />}
             </button>
 
-            {/* User Profile */}
+            {/* User Profile & Sign Out */}
             <div className="flex items-center gap-3 pl-3 border-l border-white/[0.06]">
               <div className="relative">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 p-0.5 shadow-lg">
                   <img
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+                    src={session?.user?.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"}
                     alt="User avatar"
                     className="w-full h-full rounded-full object-cover"
                   />
@@ -350,9 +353,17 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-zinc-950 status-dot-active" />
               </div>
               <div className="hidden lg:block text-left">
-                <p className="text-xs font-bold text-zinc-100">Alex Rivera</p>
-                <p className="text-[10px] text-zinc-500">Owner & SaaS Admin</p>
+                <p className="text-xs font-bold text-zinc-100">{session?.user?.name || 'Alex Rivera'}</p>
+                <p className="text-[10px] text-zinc-500 truncate max-w-[120px]">{session?.user?.email || 'Owner & SaaS Admin'}</p>
               </div>
+
+              <button
+                onClick={() => signOut({ callbackUrl: '/login' })}
+                className="p-1.5 rounded-lg hover:bg-rose-500/10 text-zinc-400 hover:text-rose-400 transition ml-1"
+                title="Sign Out"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </header>
