@@ -423,7 +423,7 @@ export default function WebsitesPage() {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Khadka Tech Daily"
+                      placeholder="e.g. Your Tech Daily"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full px-3.5 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500"
@@ -435,7 +435,7 @@ export default function WebsitesPage() {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. khadkatech.io"
+                      placeholder="e.g. Yourtech.io"
                       value={formData.domain}
                       onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
                       className="w-full px-3.5 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500"
