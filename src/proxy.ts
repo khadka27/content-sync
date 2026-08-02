@@ -38,8 +38,8 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // 4. If already authenticated and visits /login, redirect to /dashboard
-  if (pathname === '/login' && isAuthenticated) {
+  // 4. If already authenticated and visits / or /login, redirect to /dashboard
+  if ((pathname === '/' || pathname === '/login') && isAuthenticated) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
@@ -57,5 +57,5 @@ export async function proxy(request: NextRequest) {
 export default proxy;
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/api/:path*', '/proxy', '/proxy-image'],
+  matcher: ['/', '/dashboard/:path*', '/login', '/api/:path*', '/proxy', '/proxy-image'],
 };
