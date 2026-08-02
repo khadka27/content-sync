@@ -1,35 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { Platform } from '@prisma/client';
-
-async function getOrCreateDefaultWorkspace() {
-  let user = await prisma.user.findFirst();
-  if (!user) {
-    user = await prisma.user.create({
-      data: {
-        email: 'admin@contentpilot.ai',
-        name: 'Workspace Admin',
-        role: 'OWNER',
-      },
-    });
-  }
-
-  let workspace = await prisma.workspace.findFirst();
-  if (!workspace) {
-    workspace = await prisma.workspace.create({
-      data: {
-        name: 'Main Workspace',
-        slug: 'main-workspace',
-        ownerId: user.id,
-      },
-    });
-  }
-  return workspace;
-}
+import { getUserWorkspace } from '@/lib/userWorkspace';
 
 export async function GET() {
   try {
+    const { workspace } = await getUserWorkspace();
+
+    // Query websites strictly belonging to the authenticated user's workspace
     const websites = await prisma.website.findMany({
+      where: {
+        workspaceId: workspace.id,
+      },
       include: {
         socialAccounts: true,
       },
@@ -59,7 +40,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Name and Domain are required fields.' }, { status: 400 });
     }
 
-    const workspace = await getOrCreateDefaultWorkspace();
+    const { workspace } = await getUserWorkspace();
 
     const created = await prisma.website.create({
       data: {
@@ -73,7 +54,7 @@ export async function POST(req: Request) {
         language: language || 'en',
         rssFeed: rssFeed || '',
         wordpressApi: wordpressApi || '',
-        webhookUrl: webhookUrl || `https://api.contentpilot.ai/v1/webhook/${Date.now()}`,
+        webhookUrl: webhookUrl || `https://api.contentsync.ai/v1/webhook/${Date.now()}`,
         status: 'ACTIVE',
       },
     });

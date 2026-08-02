@@ -107,10 +107,10 @@ export default function Home() {
               Sign In
             </Link>
             <Link
-              href="/dashboard"
+              href="/login"
               className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all btn-glow flex items-center gap-2"
             >
-              <span>Launch Dashboard</span>
+              <span>Sign Up</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>

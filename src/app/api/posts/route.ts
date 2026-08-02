@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Platform, PostStatus, Tone } from '@prisma/client';
 import { TikTokService } from '@/lib/tiktok';
+import { getUserWorkspace } from '@/lib/userWorkspace';
 
 export async function GET(req: Request) {
   try {
@@ -9,7 +10,11 @@ export async function GET(req: Request) {
     const websiteId = searchParams.get('websiteId');
     const status = searchParams.get('status');
 
-    const where: any = {};
+    const { workspace } = await getUserWorkspace();
+
+    const where: any = {
+      workspaceId: workspace.id,
+    };
     if (websiteId) where.websiteId = websiteId;
     if (status) where.status = status as PostStatus;
 
