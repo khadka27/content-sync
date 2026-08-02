@@ -10,7 +10,9 @@ export type Platform =
   | 'THREADS'
   | 'PINTEREST'
   | 'TELEGRAM'
-  | 'DISCORD';
+  | 'DISCORD'
+  | 'TIKTOK'
+  | 'YOUTUBE';
 
 export type AutomationType = 'RSS' | 'WORDPRESS' | 'WEBHOOK' | 'MANUAL_URL';
 
@@ -39,8 +41,13 @@ export interface SocialAccount {
   accountName: string;
   handle?: string;
   avatar?: string;
+  pageId?: string;          // FB Page ID / IG user ID / TikTok openId
+  accessToken?: string;
   connected: boolean;
+  isActive: boolean;        // enabled/disabled without full disconnect
+  isPrimary: boolean;       // default account for this platform
   followers: number;
+  addedAt?: string;         // ISO string when this account was connected
 }
 
 export interface Post {
@@ -52,6 +59,7 @@ export interface Post {
   tone: Tone;
   platforms: Platform[];
   platformCopies?: Record<Platform, string>;
+  targetAccountIds?: string[];   // specific SocialAccount IDs to publish to
   hashtags: string[];
   cta?: string;
   emojis: boolean;

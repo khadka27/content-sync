@@ -33,6 +33,8 @@ enum Platform {
   PINTEREST
   TELEGRAM
   DISCORD
+  TIKTOK
+  YOUTUBE
 }
 
 enum AutomationType {
@@ -78,27 +80,27 @@ model Workspace {
 }
 
 model Website {
-  id            String          @id @default(cuid())
-  workspaceId   String
-  workspace     Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  name          String
-  domain        String
-  logo          String?
-  brandColor    String          @default("#3b82f6")
-  description   String?
-  timezone      String          @default("UTC")
-  language      String          @default("en")
-  rssFeed       String?
-  wordpressApi  String?
-  webhookUrl    String?
-  status        String          @default("ACTIVE")
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id             String          @id @default(cuid())
+  workspaceId    String
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name           String
+  domain         String
+  logo           String?
+  brandColor     String          @default("#3b82f6")
+  description    String?
+  timezone       String          @default("UTC")
+  language       String          @default("en")
+  rssFeed        String?
+  wordpressApi   String?
+  webhookUrl     String?
+  status         String          @default("ACTIVE")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   socialAccounts SocialAccount[]
-  posts         Post[]
-  automations   Automation[]
-  analytics     Analytics[]
-  brandSettings BrandSettings?
+  posts          Post[]
+  automations    Automation[]
+  analytics      Analytics[]
+  brandSettings  BrandSettings?
 }
 
 model SocialAccount {
@@ -109,48 +111,53 @@ model SocialAccount {
   accountName String
   handle      String?
   avatar      String?
+  pageId      String? // FB Page ID / IG user ID / TikTok openId
   accessToken String?
   connected   Boolean  @default(true)
+  isActive    Boolean  @default(true)
+  isPrimary   Boolean  @default(false)
   followers   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@unique([websiteId, platform])
+  // No unique constraint - multiple accounts per platform allowed per workspace
+  @@index([websiteId, platform])
 }
 
 model Post {
-  id              String       @id @default(cuid())
-  workspaceId     String
-  workspace       Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  websiteId       String
-  website         Website      @relation(fields: [websiteId], references: [id], onDelete: Cascade)
-  title           String
-  originalUrl     String?
-  summary         String?
-  tone            Tone         @default(PROFESSIONAL)
-  platforms       Platform[]
-  platformCopies  Json?        // { FACEBOOK: "...", TWITTER: "..." }
-  hashtags        String[]
-  cta             String?
-  emojis          Boolean      @default(true)
-  mediaUrls       String[]
-  status          PostStatus   @default(DRAFT)
-  scheduledAt     DateTime?
-  publishedAt     DateTime?
-  errorMessage    String?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  schedules       Schedule[]
+  id               String     @id @default(cuid())
+  workspaceId      String
+  workspace        Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  websiteId        String
+  website          Website    @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  title            String
+  originalUrl      String?
+  summary          String?
+  tone             Tone       @default(PROFESSIONAL)
+  platforms        Platform[]
+  platformCopies   Json? // { FACEBOOK: "...", TWITTER: "..." }
+  targetAccountIds String[] // specific SocialAccount IDs to publish to
+  hashtags         String[]
+  cta              String?
+  emojis           Boolean    @default(true)
+  mediaUrls        String[]
+  status           PostStatus @default(DRAFT)
+  scheduledAt      DateTime?
+  publishedAt      DateTime?
+  errorMessage     String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  schedules        Schedule[]
 }
 
 model Schedule {
-  id          String   @id @default(cuid())
-  postId      String
-  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  cronExpr    String?
-  recurring   Boolean  @default(false)
-  nextRun     DateTime
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  cronExpr  String?
+  recurring Boolean  @default(false)
+  nextRun   DateTime
+  createdAt DateTime @default(now())
 }
 
 model Automation {
@@ -175,7 +182,7 @@ model Media {
   name        String
   url         String
   folder      String    @default("General")
-  type        String    // IMAGE, VIDEO, BRAND, AI_GENERATED
+  type        String // IMAGE, VIDEO, BRAND, AI_GENERATED
   size        Int?
   createdAt   DateTime  @default(now())
 }
@@ -216,23 +223,36 @@ model TeamMember {
 }
 
 model Subscription {
-  id             String   @id @default(cuid())
-  userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan           String   @default("PRO") // FREE, PRO, AGENCY
-  status         String   @default("ACTIVE")
-  aiCreditsTotal Int      @default(1000)
-  aiCreditsUsed  Int      @default(0)
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan             String   @default("PRO") // FREE, PRO, AGENCY
+  status           String   @default("ACTIVE")
+  aiCreditsTotal   Int      @default(1000)
+  aiCreditsUsed    Int      @default(0)
   currentPeriodEnd DateTime
-  createdAt      DateTime @default(now())
+  createdAt        DateTime @default(now())
 }
 
 model BrandSettings {
-  id          String   @id @default(cuid())
-  websiteId   String   @unique
-  website     Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
-  defaultTone Tone     @default(PROFESSIONAL)
-  hashtags    String[]
-  ctaText     String?
-  logoWatermark Boolean @default(false)
+  id            String   @id @default(cuid())
+  websiteId     String   @unique
+  website       Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  defaultTone   Tone     @default(PROFESSIONAL)
+  hashtags      String[]
+  ctaText       String?
+  logoWatermark Boolean  @default(false)
+}
+
+model TikTokAccount {
+  id           String   @id @default(cuid())
+  userId       String?
+  websiteId    String?
+  openId       String   @unique
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
+  scope        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

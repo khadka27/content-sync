@@ -1,8 +1,20 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  reactCompiler: true,
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: '**' },
+      { protocol: 'http', hostname: '**' },
+    ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/proxy-image',
+        destination: '/api/image-proxy',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       LINKEDIN: `${prefix} ${sampleTitle}\n\nKey Insights for Industry Leaders:\n• ${sampleContent}\n• Streamlined multi-channel publishing\n• Real-time analytics tracking\n\nWhat is your team’s approach to content automation this year? Let's discuss in the comments below! 👇\n\n#SaaS #AI #Leadership #Marketing`,
       INSTAGRAM: `✨ ${sampleTitle} ✨\n\n${sampleContent}\n\n💡 Save this post for your next campaign!\n\n📲 Link in bio to try ContentPilot AI.\n\n. . .\n#ContentCreation #AIStudio #GrowthHacks #InstaDaily`,
       FACEBOOK: `${prefix} ${sampleTitle}\n\n${sampleContent}\n\nRead the full update on our blog today! Link in comments below. 👇`,
-      THREADS: `${prefix} ${sampleTitle} — quick takeaway: ${sampleContent.slice(0, 120)}. What are your thoughts?`,
+      THREADS: `${prefix} ${sampleTitle} - quick takeaway: ${sampleContent.slice(0, 120)}. What are your thoughts?`,
       PINTEREST: `📌 ${sampleTitle} | Step-by-Step Infographic & Guide for Digital Marketers`,
       TELEGRAM: `📢 [NEW POST] ${sampleTitle}\n\n${sampleContent}\n\n👉 Join the conversation in our community channel!`,
       DISCORD: `🚀 **New Content Drop**: **${sampleTitle}**\n\n> ${sampleContent}\n\nDiscuss this in #content-strategy!`,

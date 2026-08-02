@@ -16,9 +16,9 @@ import {
   Plus,
   Zap,
   CheckCircle2,
-  Calendar as CalendarIcon,
-  Play,
   RotateCw,
+  Activity,
+  Cpu,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -34,44 +34,110 @@ export default function DashboardPage() {
   const failedPosts = websitePosts.filter((p) => p.status === 'FAILED');
 
   const statCards = [
-    { label: 'Total Websites', value: websites.length, icon: Globe, color: 'from-blue-600 to-indigo-600', link: '/dashboard/websites' },
-    { label: 'Connected Accounts', value: connectedSocialsCount, icon: Share2, color: 'from-purple-600 to-pink-600', link: '/dashboard/websites' },
-    { label: 'Today’s Published Posts', value: todayPosts.length, icon: CheckCircle2, color: 'from-emerald-600 to-teal-600', link: '/dashboard/posts' },
-    { label: 'Scheduled Queue', value: scheduledPosts.length, icon: Clock, color: 'from-amber-600 to-orange-600', link: '/dashboard/posts?tab=calendar' },
-    { label: 'Action Needed / Failed', value: failedPosts.length, icon: AlertTriangle, color: 'from-rose-600 to-red-600', link: '/dashboard/posts?status=FAILED' },
-    { label: 'AI Credits Remaining', value: subscription.aiCreditsTotal - subscription.aiCreditsUsed, icon: Sparkles, color: 'from-cyan-600 to-blue-600', link: '/dashboard/billing' },
+    {
+      label: 'Total Websites',
+      value: websites.length,
+      icon: Globe,
+      gradient: 'from-blue-600 to-cyan-500',
+      glow: 'shadow-blue-500/20',
+      badge: 'badge-neon-blue',
+      link: '/dashboard/websites',
+    },
+    {
+      label: 'Connected Accounts',
+      value: connectedSocialsCount,
+      icon: Share2,
+      gradient: 'from-violet-600 to-purple-500',
+      glow: 'shadow-purple-500/20',
+      badge: 'badge-neon-purple',
+      link: '/dashboard/websites',
+    },
+    {
+      label: "Today's Published",
+      value: todayPosts.length,
+      icon: CheckCircle2,
+      gradient: 'from-emerald-600 to-teal-500',
+      glow: 'shadow-emerald-500/20',
+      badge: 'badge-neon-emerald',
+      link: '/dashboard/posts',
+    },
+    {
+      label: 'Scheduled Queue',
+      value: scheduledPosts.length,
+      icon: Clock,
+      gradient: 'from-amber-500 to-orange-500',
+      glow: 'shadow-amber-500/20',
+      badge: 'badge-neon-amber',
+      link: '/dashboard/posts?tab=calendar',
+    },
+    {
+      label: 'Failed / Action Needed',
+      value: failedPosts.length,
+      icon: AlertTriangle,
+      gradient: 'from-rose-600 to-red-500',
+      glow: 'shadow-rose-500/20',
+      badge: 'badge-neon-rose',
+      link: '/dashboard/posts?status=FAILED',
+    },
+    {
+      label: 'AI Credits Left',
+      value: subscription.aiCreditsTotal - subscription.aiCreditsUsed,
+      icon: Cpu,
+      gradient: 'from-sky-600 to-blue-500',
+      glow: 'shadow-sky-500/20',
+      badge: 'badge-neon-blue',
+      link: '/dashboard/billing',
+    },
+  ];
+
+  const platforms = [
+    { name: 'Twitter / X',  reach: '142K', pct: 85, color: 'from-sky-400 to-sky-600' },
+    { name: 'Instagram',    reach: '180K', pct: 95, color: 'from-rose-400 to-pink-600' },
+    { name: 'LinkedIn',     reach: '78K',  pct: 65, color: 'from-blue-500 to-blue-700' },
+    { name: 'TikTok',       reach: '95K',  pct: 72, color: 'from-emerald-400 to-teal-600' },
+    { name: 'Threads',      reach: '45K',  pct: 48, color: 'from-violet-400 to-purple-600' },
   ];
 
   return (
     <DashboardLayout>
-      <div className="space-y-8 animate-in fade-in duration-300">
-        {/* Welcome Banner */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-purple-900/30 border border-blue-500/20 p-8">
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                <Sparkles className="w-3.5 h-3.5" />
+      <div className="space-y-6 animate-slide-up">
+
+        {/* ── Welcome Banner ─────────────────────────────────── */}
+        <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 p-7 noise">
+          {/* Gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-indigo-900/30 to-purple-900/30" />
+          <div className="absolute -top-20 -right-20 w-60 h-60 bg-blue-600/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-600/10 rounded-full blur-2xl" />
+
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-neon-blue text-xs font-semibold">
+                <Sparkles className="w-3.5 h-3.5 text-blue-400" />
                 <span>Multi-Workspace Automation Suite</span>
               </div>
-              <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+              <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight font-display">
                 Welcome back, Alex! 👋
               </h1>
-              <p className="text-sm text-zinc-300 leading-relaxed">
-                Currently managing <span className="font-semibold text-white">{activeWebsite?.name}</span> ({activeWebsite?.domain}). You have <span className="text-amber-400 font-semibold">{scheduledPosts.length} posts scheduled</span> across {connectedSocialsCount} connected platforms.
+              <p className="text-sm text-zinc-300 leading-relaxed max-w-xl">
+                Managing{' '}
+                <span className="font-semibold text-white">{activeWebsite?.name}</span>{' '}
+                <span className="text-zinc-500">({activeWebsite?.domain})</span> · You have{' '}
+                <span className="text-amber-400 font-semibold">{scheduledPosts.length} posts scheduled</span>{' '}
+                across {connectedSocialsCount} connected platforms.
               </p>
             </div>
 
             <div className="flex items-center gap-3 shrink-0">
               <Link
                 href="/dashboard/posts?action=create"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs shadow-lg shadow-blue-600/30 transition"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition btn-glow"
               >
                 <Plus className="w-4 h-4" />
                 <span>Create AI Post</span>
               </Link>
               <Link
                 href="/dashboard/ai-lab"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 font-medium text-xs transition"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl glass border border-purple-500/30 hover:border-purple-400/50 text-purple-300 font-bold text-xs transition"
               >
                 <Sparkles className="w-4 h-4" />
                 <span>AI Script Lab</span>
@@ -80,68 +146,62 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Dashboard Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        {/* ── Stat Cards ─────────────────────────────────────── */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
           {statCards.map((card, idx) => {
             const Icon = card.icon;
             return (
               <Link
                 key={idx}
                 href={card.link}
-                className="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800/80 hover:border-zinc-700 transition group relative overflow-hidden"
+                className="group p-5 rounded-2xl glass border border-white/[0.06] hover:border-white/[0.12] transition-all stat-card relative overflow-hidden"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-semibold text-zinc-400">{card.label}</span>
-                  <div className={`p-2 rounded-xl bg-gradient-to-tr ${card.color} text-white shadow-md`}>
-                    <Icon className="w-4 h-4" />
-                  </div>
+                {/* BG glow orb */}
+                <div className={`absolute -top-8 -right-8 w-20 h-20 rounded-full bg-gradient-to-tr ${card.gradient} opacity-10 blur-xl group-hover:opacity-20 transition-opacity`} />
+
+                <div className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${card.gradient} flex items-center justify-center mb-3 shadow-lg`}>
+                  <Icon className="w-4 h-4 text-white" />
                 </div>
-                <div className="text-2xl font-extrabold text-white font-mono tracking-tight group-hover:text-blue-400 transition">
+                <div className="text-2xl font-black text-white font-mono tracking-tight mb-1 group-hover:scale-105 transition-transform origin-left">
                   {card.value}
                 </div>
+                <div className="text-[11px] text-zinc-400 font-medium leading-tight">{card.label}</div>
               </Link>
             );
           })}
         </div>
 
-        {/* Middle Section: Reach Chart & Quick Automation Status */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Performance Overview Visual */}
-          <div className="lg:col-span-2 p-6 rounded-3xl bg-zinc-900/80 border border-zinc-800/80 space-y-6">
+        {/* ── Reach Chart + Automation Status ──────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          {/* Reach Chart */}
+          <div className="lg:col-span-2 p-6 rounded-3xl glass border border-white/[0.06] space-y-5">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-emerald-400" />
                   Cross-Platform Reach & Impressions
                 </h3>
-                <p className="text-xs text-zinc-400">Weekly engagement metrics for {activeWebsite?.name}</p>
+                <p className="text-[11px] text-zinc-400 mt-0.5">Weekly engagement for {activeWebsite?.name}</p>
               </div>
               <Link
                 href="/dashboard/analytics"
-                className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1"
+                className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 transition"
               >
-                <span>Full Analytics</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
+                Full Analytics <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
-            {/* Custom Interactive Bars Chart */}
-            <div className="space-y-4 pt-2">
-              {[
-                { platform: 'Twitter / X', reach: '142,000', percentage: 85, color: 'bg-sky-500' },
-                { platform: 'Instagram', reach: '180,000', percentage: 95, color: 'bg-pink-500' },
-                { platform: 'LinkedIn', reach: '78,000', percentage: 65, color: 'bg-blue-600' },
-                { platform: 'Threads', reach: '45,000', percentage: 48, color: 'bg-purple-500' },
-              ].map((item, idx) => (
+            <div className="space-y-4">
+              {platforms.map((item, idx) => (
                 <div key={idx} className="space-y-1.5">
                   <div className="flex justify-between text-xs">
-                    <span className="font-medium text-zinc-300">{item.platform}</span>
+                    <span className="font-semibold text-zinc-200">{item.name}</span>
                     <span className="font-mono text-zinc-400">{item.reach} reach</span>
                   </div>
-                  <div className="w-full bg-zinc-800 h-2.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-zinc-800/80 h-2 rounded-full overflow-hidden">
                     <div
-                      className={`${item.color} h-full rounded-full transition-all duration-500`}
-                      style={{ width: `${item.percentage}%` }}
+                      className={`bg-gradient-to-r ${item.color} h-full rounded-full transition-all duration-700`}
+                      style={{ width: `${item.pct}%` }}
                     />
                   </div>
                 </div>
@@ -149,103 +209,112 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Quick Automation Status */}
-          <div className="p-6 rounded-3xl bg-zinc-900/80 border border-zinc-800/80 space-y-6">
+          {/* Automation Status */}
+          <div className="p-6 rounded-3xl glass border border-white/[0.06] space-y-5">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
                 <Zap className="w-4 h-4 text-amber-400" />
                 Automation Channels
               </h3>
-              <Link href="/dashboard/automation" className="text-xs text-blue-400 hover:underline">
+              <Link href="/dashboard/automation" className="text-xs text-blue-400 hover:text-blue-300 transition">
                 Configure
               </Link>
             </div>
 
             <div className="space-y-3">
-              <div className="p-3.5 rounded-2xl bg-zinc-800/50 border border-zinc-800 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-zinc-200">RSS Auto-Sync</p>
-                  <p className="text-[10px] text-zinc-400">techpulse.io/rss.xml</p>
+              {[
+                { name: 'RSS Auto-Sync', sub: 'techpulse.io/rss.xml', status: 'ACTIVE' },
+                { name: 'WordPress REST', sub: 'WP REST v2 API', status: 'ACTIVE' },
+                { name: 'Webhook Receiver', sub: 'api.contentpilot.ai/webhook', status: 'ACTIVE' },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="p-3.5 rounded-2xl bg-zinc-800/40 border border-white/[0.04] flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-zinc-200 truncate">{item.name}</p>
+                    <p className="text-[10px] text-zinc-500 font-mono truncate">{item.sub}</p>
+                  </div>
+                  <span className="shrink-0 px-2 py-0.5 rounded-full badge-neon-emerald text-[10px] font-bold">
+                    {item.status}
+                  </span>
                 </div>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  ACTIVE
+              ))}
+            </div>
+
+            {/* AI Credits Mini Meter */}
+            <div className="pt-3 border-t border-white/[0.06] space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-zinc-400 flex items-center gap-1.5">
+                  <Cpu className="w-3.5 h-3.5 text-blue-400" />
+                  AI Credits
+                </span>
+                <span className="font-mono text-zinc-200 font-semibold">
+                  {subscription.aiCreditsTotal - subscription.aiCreditsUsed} / {subscription.aiCreditsTotal}
                 </span>
               </div>
-
-              <div className="p-3.5 rounded-2xl bg-zinc-800/50 border border-zinc-800 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-zinc-200">WordPress Listener</p>
-                  <p className="text-[10px] text-zinc-400">WP REST v2 API</p>
-                </div>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  ACTIVE
-                </span>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-zinc-800/50 border border-zinc-800 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-zinc-200">Webhook Receiver</p>
-                  <p className="text-[10px] text-zinc-400">api.contentpilot.ai/webhook</p>
-                </div>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  ACTIVE
-                </span>
+              <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                <div
+                  className="progress-bar h-full rounded-full"
+                  style={{ width: `${Math.min(100, ((subscription.aiCreditsTotal - subscription.aiCreditsUsed) / subscription.aiCreditsTotal) * 100)}%` }}
+                />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Recent Activity & Posts */}
-        <div className="p-6 rounded-3xl bg-zinc-900/80 border border-zinc-800/80 space-y-6">
+        {/* ── Recent Posts Activity ─────────────────────────────── */}
+        <div className="p-6 rounded-3xl glass border border-white/[0.06] space-y-5">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <FileText className="w-4 h-4 text-blue-400" />
-              Recent Post Activity for {activeWebsite?.name}
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <Activity className="w-4 h-4 text-blue-400" />
+              Recent Post Activity - {activeWebsite?.name}
             </h3>
-            <Link href="/dashboard/posts" className="text-xs text-blue-400 hover:text-blue-300 font-medium">
-              View All Posts ({websitePosts.length})
+            <Link href="/dashboard/posts" className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 transition">
+              View All ({websitePosts.length}) <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           <div className="space-y-3">
             {websitePosts.length === 0 ? (
-              <div className="text-center py-10 border border-dashed border-zinc-800 rounded-2xl">
-                <p className="text-xs text-zinc-400">No posts generated for this website yet.</p>
+              <div className="text-center py-12 border border-dashed border-zinc-800 rounded-2xl">
+                <FileText className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
+                <p className="text-sm text-zinc-400 mb-4">No posts generated yet for this workspace.</p>
                 <Link
                   href="/dashboard/posts?action=create"
-                  className="inline-flex items-center gap-2 mt-3 px-3.5 py-2 rounded-xl bg-blue-600 text-white text-xs font-medium"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition"
                 >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Create First Post</span>
+                  <Plus className="w-4 h-4" />
+                  Create First Post
                 </Link>
               </div>
             ) : (
-              websitePosts.map((post) => (
+              websitePosts.slice(0, 8).map((post) => (
                 <div
                   key={post.id}
-                  className="p-4 rounded-2xl bg-zinc-950/60 border border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                  className="p-4 rounded-2xl bg-zinc-900/60 border border-white/[0.04] hover:border-white/[0.08] flex flex-col md:flex-row md:items-center justify-between gap-4 transition"
                 >
-                  <div className="space-y-1 max-w-2xl">
-                    <div className="flex items-center gap-2">
+                  <div className="space-y-1.5 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span
                         className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
                           post.status === 'PUBLISHED'
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                            ? 'badge-neon-emerald'
                             : post.status === 'SCHEDULED'
-                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                            ? 'badge-neon-amber'
                             : post.status === 'FAILED'
-                            ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                            : 'bg-zinc-800 text-zinc-400'
+                            ? 'badge-neon-rose'
+                            : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
                         }`}
                       >
                         {post.status}
                       </span>
-                      <span className="text-[10px] text-zinc-400 uppercase font-semibold font-mono">
-                        {post.tone} TONE
+                      <span className="text-[10px] text-zinc-500 uppercase font-mono font-semibold">
+                        {post.tone}
                       </span>
                     </div>
-                    <h4 className="text-sm font-semibold text-zinc-100">{post.title}</h4>
-                    <p className="text-xs text-zinc-400 line-clamp-1">{post.summary}</p>
+                    <h4 className="text-sm font-semibold text-zinc-100 truncate">{post.title}</h4>
+                    <p className="text-xs text-zinc-500 line-clamp-1">{post.summary}</p>
                   </div>
 
                   <div className="flex items-center gap-3 shrink-0">
@@ -253,7 +322,7 @@ export default function DashboardPage() {
                       {post.platforms.map((plat) => (
                         <span
                           key={plat}
-                          className="w-6 h-6 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[9px] font-bold text-zinc-300"
+                          className="w-6 h-6 rounded-full glass border border-white/10 flex items-center justify-center text-[9px] font-black text-zinc-300"
                         >
                           {plat.charAt(0)}
                         </span>
@@ -266,7 +335,7 @@ export default function DashboardPage() {
                         className="px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-semibold flex items-center gap-1.5 transition"
                       >
                         <RotateCw className="w-3.5 h-3.5" />
-                        <span>Retry</span>
+                        Retry
                       </button>
                     )}
                   </div>

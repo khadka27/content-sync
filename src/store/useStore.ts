@@ -32,6 +32,7 @@ interface StoreState {
 
   // Actions
   fetchInitialData: () => Promise<void>;
+  fetchSocialAccounts: (websiteId: string) => Promise<void>;
   setActiveWebsiteId: (id: string) => void;
   setCommandPaletteOpen: (open: boolean) => void;
 
@@ -41,7 +42,13 @@ interface StoreState {
   deleteWebsite: (id: string) => void;
 
   // Social Account Actions
-  toggleSocialAccount: (websiteId: string, platform: Platform) => void;
+  addSocialAccount: (websiteId: string, platform: Platform, accountName: string, handle: string, accessToken: string, pageId?: string) => Promise<void>;
+  removeSocialAccount: (websiteId: string, accountId: string) => Promise<void>;
+  toggleAccountActive: (websiteId: string, accountId: string) => void;
+  setPrimaryAccount: (websiteId: string, accountId: string) => void;
+  // Legacy compat shims
+  connectSocialAccount: (websiteId: string, platform: Platform, accountName: string, handle: string, accessToken: string) => Promise<void>;
+  disconnectSocialAccount: (websiteId: string, platform: Platform) => Promise<void>;
 
   // Post Actions
   addPost: (post: Omit<Post, 'id' | 'createdAt'>) => Promise<void>;
@@ -103,12 +110,45 @@ export const useStore = create<StoreState>((set, get) => ({
         activeWebsiteId: nextActiveId,
         isLoading: false,
       });
+
+      if (nextActiveId) {
+        get().fetchSocialAccounts(nextActiveId);
+      }
     } catch {
       set({ isLoading: false });
     }
   },
 
-  setActiveWebsiteId: (id: string) => set({ activeWebsiteId: id }),
+  fetchSocialAccounts: async (websiteId: string) => {
+    if (!websiteId) return;
+    try {
+      const res = await fetch(`/api/social?websiteId=${websiteId}`);
+      const data = await res.json();
+      if (data.success && data.data) {
+        set((state) => ({
+          socialAccounts: {
+            ...state.socialAccounts,
+            [websiteId]: data.data,
+          },
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to fetch social accounts:', err);
+    }
+  },
+
+  setActiveWebsiteId: (id: string) => {
+    set({ activeWebsiteId: id });
+    if (id) {
+      get().fetchSocialAccounts(id);
+      fetch('/api/cookies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'set_website', websiteId: id }),
+      }).catch(() => {});
+    }
+  },
+
   setCommandPaletteOpen: (open: boolean) => set({ commandPaletteOpen: open }),
 
   addWebsite: async (newWeb) => {
@@ -125,9 +165,9 @@ export const useStore = create<StoreState>((set, get) => ({
           websites: [created, ...state.websites],
           activeWebsiteId: created.id,
         }));
+        get().fetchSocialAccounts(created.id);
       }
     } catch {
-      // Fallback local push
       const id = `web-${Date.now()}`;
       const createdWeb: Website = { ...newWeb, id, status: 'ACTIVE', socialAccountsCount: 4 };
       set((state) => ({ websites: [createdWeb, ...state.websites], activeWebsiteId: id }));
@@ -150,35 +190,112 @@ export const useStore = create<StoreState>((set, get) => ({
     });
   },
 
-  toggleSocialAccount: (websiteId, platform) => {
-    set((state) => {
-      const current = state.socialAccounts[websiteId] || [];
-      const exists = current.find((a) => a.platform === platform);
-
-      let updated: SocialAccount[];
-      if (exists) {
-        updated = current.map((a) => (a.platform === platform ? { ...a, connected: !a.connected } : a));
-      } else {
-        updated = [
-          ...current,
-          {
-            id: `sa-${Date.now()}`,
-            websiteId,
-            platform,
-            accountName: `@${platform.toLowerCase()}_account`,
-            connected: true,
-            followers: Math.floor(Math.random() * 500) + 50,
-          },
-        ];
+  addSocialAccount: async (websiteId, platform, accountName, handle, accessToken, pageId) => {
+    try {
+      const res = await fetch('/api/social', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add',
+          websiteId,
+          platform,
+          accountName,
+          handle,
+          accessToken,
+          pageId,
+          connected: true,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        get().fetchSocialAccounts(websiteId);
       }
+    } catch (err) {
+      console.error('addSocialAccount error:', err);
+      // Optimistic local update
+      const newAccount: import('@/types').SocialAccount = {
+        id: `acct-${Date.now()}`,
+        websiteId,
+        platform,
+        accountName,
+        handle,
+        pageId,
+        accessToken,
+        connected: true,
+        isActive: true,
+        isPrimary: false,
+        followers: Math.floor(Math.random() * 5000) + 250,
+        addedAt: new Date().toISOString(),
+      };
+      set((state) => ({
+        socialAccounts: {
+          ...state.socialAccounts,
+          [websiteId]: [...(state.socialAccounts[websiteId] || []), newAccount],
+        },
+      }));
+    }
+  },
 
+  removeSocialAccount: async (websiteId, accountId) => {
+    // Optimistic local removal immediately
+    set((state) => ({
+      socialAccounts: {
+        ...state.socialAccounts,
+        [websiteId]: (state.socialAccounts[websiteId] || []).filter((a) => a.id !== accountId),
+      },
+    }));
+    try {
+      await fetch('/api/social', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accountId }),
+      });
+    } catch (err) {
+      console.error('removeSocialAccount error:', err);
+      get().fetchSocialAccounts(websiteId);
+    }
+  },
+
+  toggleAccountActive: (websiteId, accountId) => {
+    set((state) => ({
+      socialAccounts: {
+        ...state.socialAccounts,
+        [websiteId]: (state.socialAccounts[websiteId] || []).map((a) =>
+          a.id === accountId ? { ...a, isActive: !a.isActive } : a
+        ),
+      },
+    }));
+  },
+
+  setPrimaryAccount: (websiteId, accountId) => {
+    set((state) => {
+      const accts = state.socialAccounts[websiteId] || [];
+      const platform = accts.find((a) => a.id === accountId)?.platform;
       return {
         socialAccounts: {
           ...state.socialAccounts,
-          [websiteId]: updated,
+          [websiteId]: accts.map((a) =>
+            a.platform === platform
+              ? { ...a, isPrimary: a.id === accountId }
+              : a
+          ),
         },
       };
     });
+  },
+
+  // Legacy shims - keep existing callers working
+  connectSocialAccount: async (websiteId, platform, accountName, handle, accessToken) => {
+    return get().addSocialAccount(websiteId, platform, accountName, handle, accessToken);
+  },
+
+  disconnectSocialAccount: async (websiteId, platform) => {
+    // Remove ALL accounts for this platform on this website
+    const accts = get().socialAccounts[websiteId] || [];
+    const toRemove = accts.filter((a) => a.platform === platform);
+    for (const a of toRemove) {
+      await get().removeSocialAccount(websiteId, a.id);
+    }
   },
 
   addPost: async (postData) => {

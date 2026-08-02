@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useStore } from '@/store/useStore';
 import { Platform } from '@/types';
+import { SocialAccountsManager } from '@/components/SocialAccountsManager';
 import {
   Globe,
   Plus,
@@ -15,10 +17,27 @@ import {
   Rss,
   Key,
   Trash2,
-  Sliders,
   CheckCircle2,
+  ShieldCheck,
+  Lock,
+  User,
+  LogOut,
   Sparkles,
+  Cookie,
+  FileCode2,
+  Zap,
+  Building2,
+  Users,
+  Loader2,
 } from 'lucide-react';
+
+interface FetchedPage {
+  id: string;
+  name: string;
+  handle: string;
+  followers: number;
+  category: string;
+}
 
 export default function WebsitesPage() {
   const {
@@ -28,10 +47,30 @@ export default function WebsitesPage() {
     addWebsite,
     deleteWebsite,
     socialAccounts,
-    toggleSocialAccount,
+    connectSocialAccount,
+    disconnectSocialAccount,
+    fetchSocialAccounts,
   } = useStore();
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [connectModalOpen, setConnectModalOpen] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
+
+  // Auth Mode: 'oauth' or 'cookie'
+  const [authMode, setAuthMode] = useState<'oauth' | 'cookie'>('cookie');
+
+  // Connection Login Form State
+  const [accountNameInput, setAccountNameInput] = useState('');
+  const [handleInput, setHandleInput] = useState('');
+  const [accessTokenInput, setAccessTokenInput] = useState('');
+  const [cookieStringInput, setCookieStringInput] = useState('');
+  const [cookieExtractStatus, setCookieExtractStatus] = useState<string | null>(null);
+  const [fetchedPages, setFetchedPages] = useState<FetchedPage[]>([]);
+  const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
+  const [isFetchingPages, setIsFetchingPages] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+
+  // New Website Form State
   const [formData, setFormData] = useState({
     name: '',
     domain: '',
@@ -48,10 +87,16 @@ export default function WebsitesPage() {
   const activeWebsite = websites.find((w) => w.id === activeWebsiteId) || websites[0];
   const activeSocials = socialAccounts[activeWebsiteId] || [];
 
-  const handleCreate = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (activeWebsiteId) {
+      fetchSocialAccounts(activeWebsiteId);
+    }
+  }, [activeWebsiteId]);
+
+  const handleCreateWebsite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.domain) return;
-    addWebsite({
+    await addWebsite({
       ...formData,
       logo: formData.logo || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=80',
     });
@@ -70,16 +115,119 @@ export default function WebsitesPage() {
     });
   };
 
-  const allPlatforms: { id: Platform; label: string; iconBg: string }[] = [
-    { id: 'FACEBOOK', label: 'Facebook Page', iconBg: 'bg-blue-600' },
-    { id: 'INSTAGRAM', label: 'Instagram Business', iconBg: 'bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600' },
-    { id: 'LINKEDIN', label: 'LinkedIn Company', iconBg: 'bg-sky-700' },
-    { id: 'TWITTER', label: 'X (Twitter)', iconBg: 'bg-zinc-800' },
-    { id: 'THREADS', label: 'Threads', iconBg: 'bg-zinc-900' },
-    { id: 'PINTEREST', label: 'Pinterest', iconBg: 'bg-rose-600' },
-    { id: 'TELEGRAM', label: 'Telegram Channel', iconBg: 'bg-sky-500' },
-    { id: 'DISCORD', label: 'Discord Guild', iconBg: 'bg-indigo-600' },
+  const openConnectModal = (plat: Platform) => {
+    const existing = activeSocials.find((s) => s.platform === plat);
+    setSelectedPlatform(plat);
+    setAccountNameInput(existing?.accountName || '');
+    setHandleInput(existing?.handle || '');
+    setAccessTokenInput(existing?.accessToken || '');
+    setCookieStringInput('');
+    setCookieExtractStatus(null);
+    setFetchedPages([]);
+    setSelectedPageId(null);
+    setAuthMode('cookie');
+    setConnectModalOpen(true);
+  };
+
+  const autoFetchDetailsFromCookies = async (val: string) => {
+    if (!val.trim()) return;
+
+    let cleanCookies = val.trim();
+
+    // Check if JSON array was pasted from Cookie Editor
+    if (cleanCookies.startsWith('[') && cleanCookies.endsWith(']')) {
+      try {
+        const parsed = JSON.parse(cleanCookies);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          cleanCookies = parsed
+            .filter((c: any) => c.name && c.value)
+            .map((c: any) => `${c.name}=${c.value}`)
+            .join('; ');
+          setCookieStringInput(cleanCookies);
+        }
+      } catch (e) {
+        // Ignore parse error while typing
+      }
+    }
+
+    setIsFetchingPages(true);
+    setCookieExtractStatus('Fetching pages from server...');
+
+    try {
+      const res = await fetch('/api/social/facebook-pages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cookies: cleanCookies, accessToken: accessTokenInput }),
+      });
+      const data = await res.json();
+
+      if (data.success && Array.isArray(data.pages) && data.pages.length > 0) {
+        setFetchedPages(data.pages);
+        setSelectedPageId(data.pages[0].id);
+        setAccountNameInput(data.pages[0].name);
+        setHandleInput(data.pages[0].handle);
+        setCookieExtractStatus(`✓ Fetched ${data.pages.length} real account profile(s)`);
+      } else {
+        setFetchedPages([]);
+        setCookieExtractStatus('✓ Session Cookies parsed cleanly');
+      }
+    } catch (err) {
+      setCookieExtractStatus('✓ Session Cookies parsed cleanly');
+    } finally {
+      setIsFetchingPages(false);
+    }
+  };
+
+  const selectFetchedPage = (page: FetchedPage) => {
+    setSelectedPageId(page.id);
+    setAccountNameInput(page.name);
+    setHandleInput(page.handle);
+  };
+
+  const handleCookieInputChange = (val: string) => {
+    setCookieStringInput(val);
+    setCookieExtractStatus(null);
+    autoFetchDetailsFromCookies(val);
+  };
+
+  const handleAuthorizeLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedPlatform || !activeWebsite) return;
+
+    setIsAuthenticating(true);
+    const tokenOrCookie = authMode === 'cookie' ? `cookie:${cookieStringInput}` : accessTokenInput;
+
+    await connectSocialAccount(
+      activeWebsite.id,
+      selectedPlatform,
+      accountNameInput,
+      handleInput,
+      tokenOrCookie
+    );
+    setIsAuthenticating(false);
+    setConnectModalOpen(false);
+  };
+
+  const handleDisconnect = async () => {
+    if (!selectedPlatform || !activeWebsite) return;
+    await disconnectSocialAccount(activeWebsite.id, selectedPlatform);
+    setConnectModalOpen(false);
+  };
+
+  const allPlatforms: { id: Platform; label: string; iconBg: string; description: string; authRoute?: string; brandColor?: string }[] = [
+    { id: 'FACEBOOK', label: 'Facebook Page', iconBg: 'bg-blue-600', description: 'Publish to company Facebook pages & groups', authRoute: '/api/auth/facebook', brandColor: '#1877F2' },
+    { id: 'INSTAGRAM', label: 'Instagram Business', iconBg: 'bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600', description: 'Post photos, carousels & auto-caption reels', authRoute: '/api/auth/instagram', brandColor: '#E4405F' },
+    { id: 'TIKTOK', label: 'TikTok Creator', iconBg: 'bg-black', description: 'Upload short video clips & TikTok Reels', authRoute: '/api/auth/tiktok', brandColor: '#000000' },
+    { id: 'LINKEDIN', label: 'LinkedIn Company', iconBg: 'bg-sky-700', description: 'Share B2B thought leadership & article previews', authRoute: '/api/auth/linkedin', brandColor: '#0A66C2' },
+    { id: 'YOUTUBE', label: 'YouTube Shorts', iconBg: 'bg-red-600', description: 'Auto-publish YouTube Shorts & video scripts', authRoute: '/api/auth/youtube', brandColor: '#FF0000' },
+    { id: 'TWITTER', label: 'X (Twitter)', iconBg: 'bg-zinc-800', description: 'Publish short updates, threads & hashtags', authRoute: '/api/auth/twitter', brandColor: '#1DA1F2' },
+    { id: 'THREADS', label: 'Threads', iconBg: 'bg-zinc-900', description: 'Auto-distribute microblog updates' },
+    { id: 'PINTEREST', label: 'Pinterest', iconBg: 'bg-rose-600', description: 'Pin visual graphics & link previews' },
+    { id: 'TELEGRAM', label: 'Telegram Channel', iconBg: 'bg-sky-500', description: 'Broadcast post alerts to Telegram channels' },
+    { id: 'DISCORD', label: 'Discord Guild', iconBg: 'bg-indigo-600', description: 'Trigger webhook announcements to Discord servers' },
   ];
+
+  const currentPlatformObj = allPlatforms.find((p) => p.id === selectedPlatform);
 
   return (
     <DashboardLayout>
@@ -92,7 +240,7 @@ export default function WebsitesPage() {
               Website & Brand Profiles
             </h1>
             <p className="text-xs text-zinc-400">
-              Manage unlimited websites. Each website has independent social credentials, RSS feeds, and branding.
+              Manage unlimited websites. Connect each website with independent social platform OAuth logins or Cookie Editor JSON exports.
             </p>
           </div>
           <button
@@ -105,147 +253,119 @@ export default function WebsitesPage() {
         </div>
 
         {/* Websites Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {websites.map((web) => {
-            const isActive = web.id === activeWebsiteId;
-            const socials = socialAccounts[web.id] || [];
-            const connectedCount = socials.filter((s) => s.connected).length;
+        {websites.length === 0 ? (
+          <div className="p-10 rounded-3xl bg-zinc-900/90 border border-zinc-800 text-center space-y-4">
+            <Globe className="w-10 h-10 text-blue-400 mx-auto" />
+            <h3 className="text-base font-bold text-white">No websites connected yet</h3>
+            <p className="text-xs text-zinc-400 max-w-md mx-auto">
+              Add your first website to enable multi-platform social logins, RSS automation, and AI distribution.
+            </p>
+            <button
+              onClick={() => setModalOpen(true)}
+              className="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs shadow-lg"
+            >
+              Add Your First Website
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {websites.map((web) => {
+              const isActive = web.id === activeWebsiteId;
+              const socials = socialAccounts[web.id] || [];
+              const connectedCount = socials.filter((s) => s.connected).length;
 
-            return (
-              <div
-                key={web.id}
-                onClick={() => setActiveWebsiteId(web.id)}
-                className={`p-6 rounded-3xl bg-zinc-900/90 border transition cursor-pointer relative flex flex-col justify-between space-y-4 ${
-                  isActive
-                    ? 'border-blue-500 shadow-xl shadow-blue-500/10 ring-1 ring-blue-500/50'
-                    : 'border-zinc-800 hover:border-zinc-700'
-                }`}
-              >
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-10 h-10 rounded-2xl overflow-hidden p-0.5 border border-zinc-700 shrink-0"
-                        style={{ borderColor: web.brandColor }}
-                      >
-                        <img src={web.logo} alt={web.name} className="w-full h-full object-cover rounded-xl" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                          {web.name}
-                          {isActive && <CheckCircle2 className="w-4 h-4 text-blue-400" />}
-                        </h3>
-                        <a
-                          href={`https://${web.domain}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-xs text-zinc-400 hover:text-blue-400 transition flex items-center gap-1"
+              return (
+                <div
+                  key={web.id}
+                  onClick={() => setActiveWebsiteId(web.id)}
+                  className={`p-6 rounded-3xl bg-zinc-900/90 border transition cursor-pointer relative flex flex-col justify-between space-y-4 ${
+                    isActive
+                      ? 'border-blue-500 shadow-xl shadow-blue-500/10 ring-1 ring-blue-500/50'
+                      : 'border-zinc-800 hover:border-zinc-700'
+                  }`}
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-10 h-10 rounded-2xl overflow-hidden p-0.5 border border-zinc-700 shrink-0"
+                          style={{ borderColor: web.brandColor }}
                         >
-                          <span>{web.domain}</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
+                          <img src={web.logo} alt={web.name} className="w-full h-full object-cover rounded-xl" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
+                            {web.name}
+                            {isActive && <CheckCircle2 className="w-4 h-4 text-blue-400" />}
+                          </h3>
+                          <a
+                            href={`https://${web.domain}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-xs text-zinc-400 hover:text-blue-400 transition flex items-center gap-1"
+                          >
+                            <span>{web.domain}</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
                       </div>
+
+                      <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: web.brandColor }} />
                     </div>
 
-                    <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: web.brandColor }} />
+                    <p className="text-xs text-zinc-400 line-clamp-2">{web.description || 'No description provided.'}</p>
                   </div>
 
-                  <p className="text-xs text-zinc-400 line-clamp-2">{web.description || 'No description provided.'}</p>
+                  <div className="pt-4 border-t border-zinc-800 flex items-center justify-between text-xs">
+                    <span className="text-zinc-400 flex items-center gap-1.5">
+                      <Share2 className="w-3.5 h-3.5 text-blue-400" />
+                      <span className="font-semibold text-zinc-200">{connectedCount} / 10</span> Connected Logins
+                    </span>
+
+                    {websites.length > 1 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteWebsite(web.id);
+                        }}
+                        className="p-1.5 text-zinc-500 hover:text-rose-400 transition"
+                        title="Delete Website"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
+              );
+            })}
+          </div>
+        )}
 
-                <div className="pt-4 border-t border-zinc-800 flex items-center justify-between text-xs">
-                  <span className="text-zinc-400 flex items-center gap-1.5">
-                    <Share2 className="w-3.5 h-3.5 text-blue-400" />
-                    <span className="font-semibold text-zinc-200">{connectedCount}</span> Accounts Connected
-                  </span>
-
-                  {websites.length > 1 && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteWebsite(web.id);
-                      }}
-                      className="p-1.5 text-zinc-500 hover:text-rose-400 transition"
-                      title="Delete Website"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Selected Website Deep Connections Section */}
+        {/* Selected Website Interactive Social Connections Section */}
         {activeWebsite && (
           <div className="p-6 rounded-3xl bg-zinc-900/90 border border-zinc-800 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
               <div>
                 <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest block mb-1">
-                  Active Configuration
+                  Social Authentication Portal
                 </span>
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  Social Accounts & Sync Settings for {activeWebsite.name}
+                  Social Accounts & OAuth Logins for {activeWebsite.name}
                 </h2>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-zinc-400 font-mono">Brand Hex:</span>
+                <span className="text-xs text-zinc-400 font-mono">Brand Theme:</span>
                 <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold text-white" style={{ backgroundColor: activeWebsite.brandColor }}>
                   {activeWebsite.brandColor}
                 </span>
               </div>
             </div>
 
-            {/* Social Platform Connection Cards */}
-            <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                <Share2 className="w-4 h-4 text-blue-400" />
-                Connected Social Platforms (8 Supported)
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {allPlatforms.map((plat) => {
-                  const account = activeSocials.find((s) => s.platform === plat.id);
-                  const isConnected = account ? account.connected : false;
-
-                  return (
-                    <div
-                      key={plat.id}
-                      className={`p-4 rounded-2xl border transition flex items-center justify-between ${
-                        isConnected
-                          ? 'bg-zinc-800/60 border-zinc-700'
-                          : 'bg-zinc-950/40 border-zinc-800/80 opacity-60'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-xl ${plat.iconBg} flex items-center justify-center text-white font-bold text-xs shadow-md`}>
-                          {plat.id.charAt(0)}
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-zinc-200">{plat.label}</p>
-                          <p className="text-[10px] text-zinc-400">
-                            {isConnected ? `@${account?.accountName || 'Connected'}` : 'Not connected'}
-                          </p>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => toggleSocialAccount(activeWebsite.id, plat.id)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
-                          isConnected
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20'
-                            : 'bg-blue-600 text-white hover:bg-blue-500'
-                        }`}
-                      >
-                        {isConnected ? 'Connected' : 'Connect'}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            {/* Multi-Account Social Manager */}
+            <SocialAccountsManager
+              websiteId={activeWebsite.id}
+            />
 
             {/* RSS & Webhooks Credentials Card */}
             <div className="pt-6 border-t border-zinc-800 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -255,7 +375,7 @@ export default function WebsitesPage() {
                   <span>RSS Feed Endpoint</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 font-mono break-all">
-                  {activeWebsite.rssFeed || 'https://techpulse.io/rss.xml'}
+                  {activeWebsite.rssFeed || 'https://website.com/rss.xml'}
                 </p>
               </div>
 
@@ -265,14 +385,14 @@ export default function WebsitesPage() {
                   <span>WordPress REST URL</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 font-mono break-all">
-                  {activeWebsite.wordpressApi || 'https://techpulse.io/wp-json/wp/v2/posts'}
+                  {activeWebsite.wordpressApi || 'https://website.com/wp-json/wp/v2/posts'}
                 </p>
               </div>
 
               <div className="p-4 rounded-2xl bg-zinc-950/60 border border-zinc-800 space-y-2">
                 <div className="flex items-center gap-2 text-xs font-bold text-zinc-200">
                   <Key className="w-4 h-4 text-emerald-400" />
-                  <span>Webhook Receiver URL</span>
+                  <span>Webhook Receiver Secret URL</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 font-mono break-all">
                   {activeWebsite.webhookUrl || `https://api.contentpilot.ai/v1/webhook/${activeWebsite.id}`}
@@ -282,13 +402,13 @@ export default function WebsitesPage() {
           </div>
         )}
 
-        {/* Modal Drawer: Create Website */}
+        {/* Modal 1: Create Website */}
         {modalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="w-full max-w-xl bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl p-6 space-y-6 text-zinc-100">
               <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-white">Connect New Website</h3>
+                  <h3 className="text-lg font-bold text-white">Connect New Website Profile</h3>
                   <p className="text-xs text-zinc-400">Configure independent branding, RSS feeds, and credentials.</p>
                 </div>
                 <button onClick={() => setModalOpen(false)} className="p-1 text-zinc-400 hover:text-zinc-200">
@@ -296,14 +416,14 @@ export default function WebsitesPage() {
                 </button>
               </div>
 
-              <form onSubmit={handleCreate} className="space-y-4">
+              <form onSubmit={handleCreateWebsite} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-semibold text-zinc-300 block mb-1">Website Name *</label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. NextGen Engineering"
+                      placeholder="e.g. Khadka Tech Daily"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full px-3.5 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500"
@@ -315,7 +435,7 @@ export default function WebsitesPage() {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. nextgen-eng.io"
+                      placeholder="e.g. khadkatech.io"
                       value={formData.domain}
                       onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
                       className="w-full px-3.5 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500"
@@ -377,8 +497,261 @@ export default function WebsitesPage() {
                     type="submit"
                     className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition"
                   >
-                    Save & Activate
+                    Save & Create Profile
                   </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal 2: Social OAuth Login & Cookie Editor JSON Authorization */}
+        {connectModalOpen && selectedPlatform && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="w-full max-w-xl bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl p-6 space-y-6 text-zinc-100 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center font-bold text-white">
+                    {selectedPlatform.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white">
+                      Authorize {selectedPlatform} Login
+                    </h3>
+                    <p className="text-xs text-zinc-400">
+                      Sign in to authorize automated post publishing for <span className="text-white font-semibold">{activeWebsite?.name}</span>.
+                    </p>
+                  </div>
+                </div>
+
+                <button onClick={() => setConnectModalOpen(false)} className="p-1 text-zinc-400 hover:text-zinc-200">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Authentication Type Selector (Cookie Editor JSON vs OAuth) */}
+              <div className="grid grid-cols-2 p-1 bg-zinc-950 rounded-2xl border border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setAuthMode('cookie')}
+                  className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                    authMode === 'cookie'
+                      ? 'bg-amber-600 text-white shadow-md'
+                      : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  <FileCode2 className="w-3.5 h-3.5" />
+                  <span>Cookie Editor JSON Export</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAuthMode('oauth')}
+                  className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                    authMode === 'oauth'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>OAuth 2.0 Token</span>
+                </button>
+              </div>
+
+              {/* Direct Social OAuth Login Trigger Button */}
+              {authMode === 'oauth' && currentPlatformObj?.authRoute && (
+                <a
+                  href={`${currentPlatformObj.authRoute}?websiteId=${activeWebsite?.id}`}
+                  className="w-full py-3 px-4 rounded-xl text-white font-bold text-xs shadow-lg transition flex items-center justify-center gap-2"
+                  style={{ backgroundColor: currentPlatformObj.brandColor || '#3b82f6' }}
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Login with {currentPlatformObj.label} OAuth</span>
+                </a>
+              )}
+
+              <form onSubmit={handleAuthorizeLogin} className="space-y-4">
+                {authMode === 'cookie' ? (
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-300 block mb-1 flex items-center justify-between">
+                      <span>Paste Cookie Editor JSON Export *</span>
+                      <span className="text-[10px] text-amber-400 font-mono flex items-center gap-1">
+                        <FileCode2 className="w-3 h-3" /> Direct JSON Paste
+                      </span>
+                    </label>
+                    <textarea
+                      rows={4}
+                      required
+                      value={cookieStringInput}
+                      onChange={(e) => handleCookieInputChange(e.target.value)}
+                      placeholder='[&#10;  { "name": "c_user", "value": "61561262578200" },&#10;  { "name": "xs", "value": "42%3Aabc..." }&#10;]'
+                      className="w-full p-3 bg-zinc-950 border border-zinc-700 rounded-xl text-xs text-amber-200 font-mono placeholder-zinc-600 focus:outline-none focus:border-amber-500 leading-relaxed"
+                    />
+                    {isFetchingPages ? (
+                      <p className="text-[11px] text-amber-400 font-semibold mt-1.5 flex items-center gap-1.5">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Querying real Facebook account pages...</span>
+                      </p>
+                    ) : cookieExtractStatus ? (
+                      <p className="text-[11px] text-emerald-400 font-semibold mt-1.5 flex items-center gap-1">
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>{cookieExtractStatus}</span>
+                      </p>
+                    ) : (
+                      <p className="text-[10px] text-zinc-400 mt-1 leading-relaxed">
+                        Open Cookie Editor extension in your browser &gt; Export &gt; Export as JSON &gt; Paste directly into the box above.
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-300 block mb-1">
+                      API Access Token / OAuth Key
+                    </label>
+                    <div className="relative flex items-center">
+                      <Lock className="w-4 h-4 text-zinc-500 absolute left-3" />
+                      <input
+                        type="password"
+                        value={accessTokenInput}
+                        onChange={(e) => setAccessTokenInput(e.target.value)}
+                        placeholder="OAuth2 Access Token"
+                        className="w-full pl-9 pr-3.5 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-xs text-zinc-100 font-mono focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                    <p className="text-[10px] text-zinc-500 mt-1">
+                      OAuth token generated automatically or paste custom API secret.
+                    </p>
+                  </div>
+                )}
+
+                {/* Display Real Fetched Facebook Pages Section */}
+                {fetchedPages.length > 0 && (
+                  <div className="space-y-2 pt-2 border-t border-zinc-800">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <Building2 className="w-4 h-4 text-amber-400" />
+                        Real Account Pages ({fetchedPages.length} Pages Found)
+                      </label>
+                      <span className="text-[10px] text-zinc-400">Select target page</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-1">
+                      {fetchedPages.map((pg) => {
+                        const isSelected = selectedPageId === pg.id;
+                        return (
+                          <div
+                            key={pg.id}
+                            onClick={() => selectFetchedPage(pg)}
+                            className={`p-3 rounded-xl border transition cursor-pointer flex items-center justify-between ${
+                              isSelected
+                                ? 'bg-amber-950/40 border-amber-500 text-white shadow-md'
+                                : 'bg-zinc-950/60 border-zinc-800 hover:border-zinc-700 text-zinc-300'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white text-xs">
+                                📄
+                              </div>
+                              <div>
+                                <p className="text-xs font-bold text-zinc-100 flex items-center gap-1.5">
+                                  {pg.name}
+                                  {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />}
+                                </p>
+                                <p className="text-[10px] text-zinc-400 flex items-center gap-2">
+                                  <span>{pg.handle}</span>
+                                  <span>•</span>
+                                  <span className="text-zinc-500">{pg.category}</span>
+                                </p>
+                              </div>
+                            </div>
+
+                            {pg.followers > 0 && (
+                              <span className="text-[10px] font-semibold px-2 py-1 rounded-md bg-zinc-800 text-zinc-300 flex items-center gap-1">
+                                <Users className="w-3 h-3 text-amber-400" />
+                                {pg.followers.toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between pt-2">
+                  <label className="text-xs font-semibold text-zinc-300">
+                    Account / Channel Name *
+                  </label>
+                  {cookieStringInput && (
+                    <button
+                      type="button"
+                      onClick={() => autoFetchDetailsFromCookies(cookieStringInput)}
+                      className="text-[10px] text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 transition"
+                    >
+                      <Zap className="w-3 h-3" />
+                      <span>Re-query Real Server API</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="relative flex items-center">
+                  <User className="w-4 h-4 text-zinc-500 absolute left-3" />
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter Real Page Name"
+                    value={accountNameInput}
+                    onChange={(e) => setAccountNameInput(e.target.value)}
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-xs text-zinc-100 focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-zinc-300 block mb-1">
+                    Username / Handle *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter Real Handle (e.g. @my_real_page)"
+                    value={handleInput}
+                    onChange={(e) => setHandleInput(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-xs text-zinc-100 focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                <div className="pt-4 border-t border-zinc-800 flex items-center justify-between">
+                  {activeSocials.find((s) => s.platform === selectedPlatform)?.connected ? (
+                    <button
+                      type="button"
+                      onClick={handleDisconnect}
+                      className="px-4 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-semibold flex items-center gap-1.5 transition"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Revoke & Disconnect</span>
+                    </button>
+                  ) : (
+                    <span />
+                  )}
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setConnectModalOpen(false)}
+                      className="px-4 py-2 rounded-xl text-xs text-zinc-400 hover:bg-zinc-800 transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isAuthenticating}
+                      className={`px-5 py-2 rounded-xl text-white font-bold text-xs shadow-lg transition flex items-center gap-1.5 ${
+                        authMode === 'cookie' ? 'bg-amber-600 hover:bg-amber-500' : 'bg-blue-600 hover:bg-blue-500'
+                      }`}
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>{isAuthenticating ? 'Authorizing...' : authMode === 'cookie' ? 'Save Cookie & Page' : 'Authorize & Connect'}</span>
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>

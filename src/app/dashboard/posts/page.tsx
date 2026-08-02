@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useStore } from '@/store/useStore';
 import { Platform, Tone, PostStatus } from '@/types';
@@ -26,10 +26,24 @@ import {
   ChevronRight,
   Image as ImageIcon,
   Check,
+  Lock,
+  ShieldCheck,
+  Video,
 } from 'lucide-react';
 
 export default function PostsPage() {
-  const { websites, activeWebsiteId, posts, addPost, updatePostStatus, deletePost, retryPost, useAiCredits } = useStore();
+  const {
+    websites,
+    activeWebsiteId,
+    posts,
+    socialAccounts,
+    fetchSocialAccounts,
+    addPost,
+    updatePostStatus,
+    deletePost,
+    retryPost,
+    useAiCredits,
+  } = useStore();
 
   const [activeTab, setActiveTab] = useState<'studio' | 'calendar' | 'all'>('studio');
   const [calendarView, setCalendarView] = useState<'month' | 'week' | 'day'>('month');
@@ -49,12 +63,28 @@ export default function PostsPage() {
   ]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [platformCopies, setPlatformCopies] = useState<Record<string, string>>({
-    TWITTER: '🚀 Excited to share our latest article on multi-workspace social automation!\n\nCheck it out here: https://contentpilot.ai #AI #SaaS',
-    LINKEDIN: 'Multi-workspace social automation is changing the game for SaaS founders and digital agencies. Here is why you should automate multi-channel distribution in 2026.\n\n#SaaS #Growth #Automation',
+    TWITTER: '🚀 Excited to share our latest update!\n\nCheck it out here: https://contentpilot.ai #AI #SaaS',
+    LINKEDIN: 'Multi-workspace social automation is changing how digital brands publish content. Here is our latest deep dive.\n\n#SaaS #Growth #Automation',
   });
   const [scheduleDate, setScheduleDate] = useState('2026-08-01T10:00');
 
+  // TikTok Settings State
+  const [tiktokPrivacy, setTiktokPrivacy] = useState<'PUBLIC_TO_EVERYONE' | 'MUTUAL_FOLLOW_FRIENDS' | 'FOLLOWER_OF_CREATOR' | 'SELF_ONLY'>('PUBLIC_TO_EVERYONE');
+  const [tiktokAllowDuet, setTiktokAllowDuet] = useState(true);
+  const [tiktokAllowComment, setTiktokAllowComment] = useState(true);
+  const [tiktokAllowStitch, setTiktokAllowStitch] = useState(true);
+  // Per-account targeting: platformId -> accountIds[]
+  const [targetAccountIds, setTargetAccountIds] = useState<Record<string, string[]>>({});
+
   const activeWebsite = websites.find((w) => w.id === activeWebsiteId) || websites[0];
+  const activeSocials = socialAccounts[activeWebsiteId] || [];
+
+  useEffect(() => {
+    if (activeWebsiteId) {
+      fetchSocialAccounts(activeWebsiteId);
+    }
+  }, [activeWebsiteId]);
+
   const filteredPosts = posts
     .filter((p) => p.websiteId === activeWebsiteId)
     .filter((p) => (statusFilter === 'ALL' ? true : p.status === statusFilter));
@@ -78,7 +108,6 @@ export default function PostsPage() {
         await handleGenerateAi(data.data.title, data.data.content);
       }
     } catch {
-      // Fallback title fill if fetch fails
       setPostTitle('Imported Article from URL');
     } finally {
       setIsScraping(false);
@@ -114,9 +143,30 @@ export default function PostsPage() {
   };
 
   const handleCreatePost = (status: PostStatus) => {
+    if (!activeWebsite) {
+      alert('Please connect a website first!');
+      return;
+    }
+
     if (!postTitle) {
       alert('Please enter a post title or paste an article URL.');
       return;
+    }
+
+    if (selectedPlatforms.length === 0) {
+      alert('Please select at least one platform to publish.');
+      return;
+    }
+
+    // Check connected status
+    const unconnectedSelected = selectedPlatforms.filter((p) => {
+      const acc = activeSocials.find((s) => s.platform === p);
+      return !acc || !acc.connected;
+    });
+
+    if (unconnectedSelected.length > 0 && status === 'PUBLISHED') {
+      const names = unconnectedSelected.join(', ');
+      alert(`Authorization Notice: You must connect and log in to ${names} under "Websites" before publishing directly.`);
     }
 
     addPost({
@@ -127,6 +177,7 @@ export default function PostsPage() {
       tone: postTone,
       platforms: selectedPlatforms,
       platformCopies: platformCopies as Record<Platform, string>,
+      targetAccountIds: allTargetAccountIds.length > 0 ? allTargetAccountIds : undefined,
       hashtags: ['#AI', '#Automation', '#Growth2026'],
       cta: 'Learn more on ContentPilot AI',
       emojis: true,
@@ -142,16 +193,38 @@ export default function PostsPage() {
   const togglePlatform = (p: Platform) => {
     if (selectedPlatforms.includes(p)) {
       setSelectedPlatforms(selectedPlatforms.filter((x) => x !== p));
+      // Clear account selections for this platform
+      setTargetAccountIds((prev) => { const n = { ...prev }; delete n[p]; return n; });
     } else {
       setSelectedPlatforms([...selectedPlatforms, p]);
+      // Auto-select all connected accounts for this platform
+      const platAccounts = activeSocials.filter((s) => s.platform === p && s.connected && s.isActive);
+      if (platAccounts.length > 0) {
+        setTargetAccountIds((prev) => ({ ...prev, [p]: platAccounts.map((a) => a.id) }));
+      }
     }
   };
 
+  const toggleAccountTarget = (platform: Platform, accountId: string) => {
+    setTargetAccountIds((prev) => {
+      const current = prev[platform] || [];
+      const updated = current.includes(accountId)
+        ? current.filter((id) => id !== accountId)
+        : [...current, accountId];
+      return { ...prev, [platform]: updated };
+    });
+  };
+
+  // Flatten all selected accountIds
+  const allTargetAccountIds = Object.values(targetAccountIds).flat();
+
   const allPlatformsList: Platform[] = [
-    'TWITTER',
-    'LINKEDIN',
-    'INSTAGRAM',
     'FACEBOOK',
+    'INSTAGRAM',
+    'TIKTOK',
+    'LINKEDIN',
+    'YOUTUBE',
+    'TWITTER',
     'THREADS',
     'PINTEREST',
     'TELEGRAM',
@@ -169,7 +242,7 @@ export default function PostsPage() {
               Post Studio & Visual Calendar
             </h1>
             <p className="text-xs text-zinc-400">
-              Create, AI-generate, preview, and schedule multi-platform posts for <span className="text-white font-semibold">{activeWebsite?.name}</span>.
+              Create, AI-generate, preview, and schedule multi-platform posts for <span className="text-white font-semibold">{activeWebsite?.name || 'Selected Website'}</span>.
             </p>
           </div>
 
@@ -298,30 +371,164 @@ export default function PostsPage() {
                   </button>
                 </div>
 
-                {/* Target Platforms Picker */}
-                <div className="space-y-2 pt-2 border-t border-zinc-800">
-                  <label className="text-xs font-semibold text-zinc-300 block">Target Platforms to Publish</label>
-                  <div className="flex flex-wrap gap-2">
+                {/* Target Platforms + Per-Account Selector */}
+                <div className="space-y-3 pt-2 border-t border-zinc-800">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-zinc-300">
+                      Target Platforms & Accounts
+                    </label>
+                    <span className="text-[10px] text-zinc-500">
+                      {selectedPlatforms.length} platform{selectedPlatforms.length !== 1 ? 's' : ''} · {allTargetAccountIds.length} account{allTargetAccountIds.length !== 1 ? 's' : ''} selected
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
                     {allPlatformsList.map((plat) => {
                       const isSelected = selectedPlatforms.includes(plat);
+                      const platAccounts = activeSocials.filter((s) => s.platform === plat);
+                      const connectedAccounts = platAccounts.filter((a) => a.connected);
+                      const hasMultiple = connectedAccounts.length > 1;
+                      const selectedAccountIds = targetAccountIds[plat] || [];
+
                       return (
-                        <button
-                          key={plat}
-                          type="button"
-                          onClick={() => togglePlatform(plat)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-2 border ${
-                            isSelected
-                              ? 'bg-blue-500/20 text-blue-300 border-blue-500/50'
-                              : 'bg-zinc-950/40 text-zinc-400 border-zinc-800 hover:border-zinc-700'
-                          }`}
-                        >
-                          {isSelected && <Check className="w-3.5 h-3.5 text-blue-400" />}
-                          <span>{plat}</span>
-                        </button>
+                        <div key={plat} className={`rounded-2xl border transition overflow-hidden ${
+                          isSelected ? 'border-blue-500/30 bg-blue-500/5' : 'border-white/[0.04] bg-zinc-900/40'
+                        }`}>
+                          {/* Platform toggle header */}
+                          <button
+                            type="button"
+                            onClick={() => togglePlatform(plat)}
+                            className="w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-white/[0.02] transition text-left"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition ${
+                                isSelected ? 'bg-blue-600 border-blue-600' : 'border-zinc-600'
+                              }`}>
+                                {isSelected && <Check className="w-3 h-3 text-white" />}
+                              </div>
+                              <span className="text-xs font-semibold text-zinc-200">{plat}</span>
+                              {connectedAccounts.length > 0 && (
+                                <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-semibold">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                  {connectedAccounts.length} account{connectedAccounts.length !== 1 ? 's' : ''}
+                                </span>
+                              )}
+                              {connectedAccounts.length === 0 && (
+                                <span className="flex items-center gap-1 text-[10px] text-zinc-600">
+                                  <Lock className="w-3 h-3" /> not connected
+                                </span>
+                              )}
+                            </div>
+                            {isSelected && hasMultiple && (
+                              <span className="text-[10px] text-blue-400">
+                                {selectedAccountIds.length}/{connectedAccounts.length} selected
+                              </span>
+                            )}
+                          </button>
+
+                          {/* Per-account checkboxes (only when platform selected & has accounts) */}
+                          {isSelected && connectedAccounts.length > 0 && (
+                            <div className="px-3.5 pb-3 space-y-1.5 border-t border-white/[0.04]">
+                              <p className="text-[10px] text-zinc-500 pt-2 mb-1">
+                                {hasMultiple ? 'Select which accounts to publish to:' : 'Publishing to:'}
+                              </p>
+                              {connectedAccounts.map((acct) => {
+                                const isAccountSelected = selectedAccountIds.includes(acct.id);
+                                return (
+                                  <button
+                                    key={acct.id}
+                                    type="button"
+                                    onClick={() => toggleAccountTarget(plat, acct.id)}
+                                    disabled={!hasMultiple}
+                                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs transition border ${
+                                      isAccountSelected
+                                        ? 'bg-blue-600/12 border-blue-500/25 text-blue-300'
+                                        : 'bg-zinc-800/30 border-white/[0.04] text-zinc-400 hover:text-zinc-200'
+                                    } disabled:cursor-default`}
+                                  >
+                                    <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
+                                      isAccountSelected ? 'bg-blue-600 border-blue-600' : 'border-zinc-600'
+                                    }`}>
+                                      {isAccountSelected && <Check className="w-2.5 h-2.5 text-white" />}
+                                    </div>
+                                    <span className="font-semibold truncate">{acct.accountName}</span>
+                                    {acct.handle && (
+                                      <span className="text-zinc-600 font-mono text-[10px] truncate">{acct.handle}</span>
+                                    )}
+                                    {acct.isPrimary && (
+                                      <span className="ml-auto text-[9px] font-bold badge-neon-blue px-1.5 py-0.5 rounded-full shrink-0">PRIMARY</span>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
                 </div>
+
+                {/* TikTok Specific Video Publishing Settings */}
+                {selectedPlatforms.includes('TIKTOK') && (
+                  <div className="p-4 rounded-2xl bg-zinc-950/80 border border-zinc-800 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs font-bold text-white">
+                        <Video className="w-4 h-4 text-emerald-400" />
+                        <span>TikTok Content Posting API v2 Settings</span>
+                      </div>
+                      <span className="text-[10px] text-emerald-400 font-mono">OAuth v2 Connected</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                      <div>
+                        <label className="text-[11px] text-zinc-400 font-semibold block mb-1">
+                          Privacy Level
+                        </label>
+                        <select
+                          value={tiktokPrivacy}
+                          onChange={(e: any) => setTiktokPrivacy(e.target.value)}
+                          className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded-xl text-xs text-zinc-100 focus:outline-none"
+                        >
+                          <option value="PUBLIC_TO_EVERYONE">Public to Everyone</option>
+                          <option value="MUTUAL_FOLLOW_FRIENDS">Friends Only</option>
+                          <option value="FOLLOWER_OF_CREATOR">Followers Only</option>
+                          <option value="SELF_ONLY">Private (Self Only)</option>
+                        </select>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-4 pt-4 sm:pt-0">
+                        <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={tiktokAllowComment}
+                            onChange={(e) => setTiktokAllowComment(e.target.checked)}
+                            className="rounded bg-zinc-800 border-zinc-700 text-blue-600"
+                          />
+                          <span>Allow Comments</span>
+                        </label>
+                        <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={tiktokAllowDuet}
+                            onChange={(e) => setTiktokAllowDuet(e.target.checked)}
+                            className="rounded bg-zinc-800 border-zinc-700 text-blue-600"
+                          />
+                          <span>Allow Duet</span>
+                        </label>
+                        <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={tiktokAllowStitch}
+                            onChange={(e) => setTiktokAllowStitch(e.target.checked)}
+                            className="rounded bg-zinc-800 border-zinc-700 text-blue-600"
+                          />
+                          <span>Allow Stitch</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Scheduling & Publish Actions */}
                 <div className="p-4 rounded-2xl bg-zinc-950/60 border border-zinc-800 space-y-4">
@@ -378,14 +585,19 @@ export default function PostsPage() {
                 <div className="space-y-4 max-h-[680px] overflow-y-auto pr-1">
                   {selectedPlatforms.map((plat) => {
                     const copy = platformCopies[plat] || platformCopies['TWITTER'] || postTitle;
+                    const account = activeSocials.find((s) => s.platform === plat);
+                    const isConnected = account ? account.connected : false;
+
                     return (
                       <div key={plat} className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-blue-500" />
+                            <span className={`w-2.5 h-2.5 rounded-full ${isConnected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
                             <span className="text-xs font-bold text-zinc-200">{plat}</span>
                           </div>
-                          <span className="text-[10px] text-zinc-500 font-mono">Format Preview</span>
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${isConnected ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400'}`}>
+                            {isConnected ? `@${account?.handle || account?.accountName}` : 'Needs Auth Login'}
+                          </span>
                         </div>
 
                         <div className="text-xs text-zinc-300 whitespace-pre-wrap leading-relaxed">
@@ -406,7 +618,7 @@ export default function PostsPage() {
           </div>
         )}
 
-        {/* TAB 2: VISUAL DRAG & DROP CALENDAR */}
+        {/* TAB 2: VISUAL CALENDAR */}
         {activeTab === 'calendar' && (
           <div className="p-6 rounded-3xl bg-zinc-900/90 border border-zinc-800 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">

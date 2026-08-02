@@ -182,7 +182,7 @@ export default function AiLabPage() {
                     {quoteOutput?.quoteText || `"Automation isn’t about doing less work; it’s about creating more space for high-impact innovation."`}
                   </p>
                   <p className="text-xs font-semibold text-purple-300 font-mono">
-                    — {quoteOutput?.author || activeWebsite?.name}
+                    - {quoteOutput?.author || activeWebsite?.name}
                   </p>
                 </div>
               </div>
