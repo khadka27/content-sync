@@ -14,8 +14,8 @@ import {
 } from 'lucide-react';
 
 export const metadata = {
-  title: 'Privacy Policy | ContentPilot AI',
-  description: 'Privacy Policy and Data Protection standards for ContentPilot AI Multi-Workspace Social Automation Platform.',
+  title: 'Privacy Policy | Content Sync',
+  description: 'Privacy Policy and Data Protection standards for Content Sync Multi-Workspace Social Automation Platform.',
 };
 
 export default function PrivacyPage() {
@@ -26,7 +26,7 @@ export default function PrivacyPage() {
       id: 'overview',
       title: '1. Overview & Commitment to Privacy',
       icon: Shield,
-      content: `At ContentPilot AI ("Service", "We", "Us", or "Our"), we take your privacy and data security seriously. This Privacy Policy explains how we collect, use, store, process, and protect your personal information and business data when you use our multi-workspace social automation platform.
+      content: `At Content Sync ("Service", "We", "Us", or "Our"), we take your privacy and data security seriously. This Privacy Policy explains how we collect, use, store, process, and protect your personal information and business data when you use our multi-workspace social automation platform.
 
 By creating an account or accessing our services, you consent to the data collection and usage practices described in this policy.`,
     },
@@ -34,7 +34,7 @@ By creating an account or accessing our services, you consent to the data collec
       id: 'information-collected',
       title: '2. Information We Collect',
       icon: Database,
-      content: `We collect several categories of information to operate, optimize, and secure ContentPilot AI:
+      content: `We collect several categories of information to operate, optimize, and secure Content Sync:
 
 - Account & Profile Data: Full name, email address, company name, profile avatar, billing preferences, and encrypted password credentials.
 - Workspace & Integration Data: Domain URLs, RSS feed links, connected social media account identifiers, and OAuth access tokens (Facebook Pages, Instagram, X, LinkedIn, Threads, Pinterest, Telegram, Discord).
@@ -66,7 +66,7 @@ By creating an account or accessing our services, you consent to the data collec
       id: 'cookies',
       title: '5. Cookies & Tracking Technologies',
       icon: Cookie,
-      content: `ContentPilot AI utilizes essential cookies and local storage tokens to maintain authenticated sessions, store workspace preferences (such as light/dark mode and active workspace selection), and secure API interactions.
+      content: `Content Sync utilizes essential cookies and local storage tokens to maintain authenticated sessions, store workspace preferences (such as light/dark mode and active workspace selection), and secure API interactions.
 
 - Essential Cookies: Strictly necessary for login sessions, CSRF protection, and navigation security.
 - Functional Storage: Preserves active workspace context and temporary post drafts.
@@ -91,13 +91,13 @@ By creating an account or accessing our services, you consent to the data collec
 - Right to Access & Portability: Request a copy of the personal data and workspace content stored in your account.
 - Right to Rectification: Correct inaccurate or incomplete profile and organization details.
 - Right to Erasure ("Right to be Forgotten"): Request permanent deletion of your account and associated social connection tokens.
-- Right to Withdraw Consent: Revoke social media OAuth connections at any time directly through ContentPilot AI settings or your social media provider's account security page.`,
+- Right to Withdraw Consent: Revoke social media OAuth connections at any time directly through Content Sync settings or your social media provider's account security page.`,
     },
     {
       id: 'international-transfers',
       title: '8. International Data Transfers',
       icon: Globe,
-      content: `ContentPilot AI operates globally. Information collected from users in the European Economic Area (EEA), United Kingdom, or other regions may be transferred to and processed on secure servers located in the United States or other countries with equivalent data protection standards under standard contractual clauses (SCCs).`,
+      content: `Content Sync operates globally. Information collected from users in the European Economic Area (EEA), United Kingdom, or other regions may be transferred to and processed on secure servers located in the United States or other countries with equivalent data protection standards under standard contractual clauses (SCCs).`,
     },
     {
       id: 'contact-privacy',
@@ -105,9 +105,9 @@ By creating an account or accessing our services, you consent to the data collec
       icon: HelpCircle,
       content: `If you wish to exercise your privacy rights, request data deletion, or submit questions regarding this Privacy Policy, please contact our Data Protection Officer:
 
-- Email: privacy@contentpilot.ai
-- Security Portal: https://contentpilot.ai/security
-- Postal Address: ContentPilot AI Inc., Attn: Privacy Officer, Legal Dept.`,
+- Email: privacy@contentsync.ai
+- Security Portal: https://contentsync.ai/security
+- Postal Address: Content Sync Inc., Attn: Privacy Officer, Legal Dept.`,
     },
   ];
 
@@ -119,10 +119,10 @@ By creating an account or accessing our services, you consent to the data collec
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">
-                CP
+                CS
               </div>
               <span className="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-white">
-                ContentPilot AI
+                Content Sync
               </span>
             </Link>
           </div>
@@ -156,7 +156,7 @@ By creating an account or accessing our services, you consent to the data collec
             Privacy Policy
           </h1>
           <p className="text-zinc-400 text-sm sm:text-base max-w-2xl mx-auto">
-            Learn how ContentPilot AI protects your data, handles social media tokens, respects user privacy rights, and ensures enterprise security.
+            Learn how Content Sync protects your data, handles social media tokens, respects user privacy rights, and ensures enterprise security.
           </p>
           <div className="pt-2 text-xs text-zinc-500 font-mono">
             Last Updated: {lastUpdated} &bull; GDPR & CCPA Compliant
@@ -194,10 +194,10 @@ By creating an account or accessing our services, you consent to the data collec
               We never sell your data or use your private workspace posts for public AI training.
             </p>
             <a
-              href="mailto:privacy@contentpilot.ai"
+              href="mailto:privacy@contentsync.ai"
               className="text-emerald-400 font-semibold underline block hover:text-emerald-300"
             >
-              privacy@contentpilot.ai
+              privacy@contentsync.ai
             </a>
           </div>
         </aside>
@@ -229,7 +229,7 @@ By creating an account or accessing our services, you consent to the data collec
 
           {/* Bottom Footer Notice */}
           <div className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800 text-center text-xs text-zinc-400 space-y-2">
-            <p>&copy; {new Date().getFullYear()} ContentPilot AI Inc. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Content Sync Inc. All rights reserved.</p>
             <div className="flex items-center justify-center gap-4 text-zinc-500 pt-1">
               <Link href="/privacy" className="hover:text-zinc-300 underline">
                 Privacy Policy

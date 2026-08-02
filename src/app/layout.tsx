@@ -4,7 +4,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { AuthProvider } from '@/components/providers/AuthProvider';
 
 export const metadata: Metadata = {
-  title: 'ContentPilot AI | Multi-Workspace Social Automation SaaS',
+  title: 'Content Sync | Multi-Workspace Social Automation SaaS',
   description: 'AI-powered social media automation platform for multi-website management, content scheduling, and analytics across 10 social platforms.',
   keywords: 'social media automation, content scheduling, AI content, multi-platform posting',
 };

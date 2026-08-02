@@ -80,10 +80,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <div className="md:hidden flex items-center justify-between px-4 py-3 bg-zinc-900 border-b border-zinc-800">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-lg">
-            CP
+            CS
           </div>
           <span className="font-bold text-base bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-300">
-            ContentPilot AI
+            Content Sync
           </span>
         </div>
         <button
@@ -106,12 +106,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-2.5">
               <div className="relative">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-500 flex items-center justify-center font-black text-white text-xs shadow-lg glow-sm-blue">
-                  CP
+                  CS
                 </div>
                 <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-zinc-950 status-dot-active" />
               </div>
               <div>
-                <h1 className="font-extrabold text-sm leading-tight gradient-text tracking-tight">ContentPilot AI</h1>
+                <h1 className="font-extrabold text-sm leading-tight gradient-text tracking-tight">Content Sync</h1>
                 <p className="text-[10px] text-zinc-500">Multi-Workspace Suite</p>
               </div>
             </div>

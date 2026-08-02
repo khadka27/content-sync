@@ -13,8 +13,8 @@ import {
 } from 'lucide-react';
 
 export const metadata = {
-  title: 'Terms & Conditions | ContentPilot AI',
-  description: 'Terms of Service and Conditions of Use for ContentPilot AI Multi-Workspace Social Automation Platform.',
+  title: 'Terms & Conditions | Content Sync',
+  description: 'Terms of Service and Conditions of Use for Content Sync Multi-Workspace Social Automation Platform.',
 };
 
 export default function TermsPage() {
@@ -128,10 +128,10 @@ If you have any questions or legal inquiries regarding these Terms & Conditions,
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">
-                CP
+                CS
               </div>
               <span className="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-white">
-                ContentPilot AI
+                Content Sync
               </span>
             </Link>
           </div>
@@ -165,7 +165,7 @@ If you have any questions or legal inquiries regarding these Terms & Conditions,
             Terms & Conditions
           </h1>
           <p className="text-zinc-400 text-sm sm:text-base max-w-2xl mx-auto">
-            Please read these terms carefully before using ContentPilot AI. By using our multi-workspace social automation service, you agree to these legal conditions.
+            Please read these terms carefully before using Content Sync. By using our multi-workspace social automation service, you agree to these legal conditions.
           </p>
           <div className="pt-2 text-xs text-zinc-500 font-mono">
             Last Updated: {lastUpdated} &bull; Version 2.4.0
@@ -238,7 +238,7 @@ If you have any questions or legal inquiries regarding these Terms & Conditions,
 
           {/* Bottom Footer Notice */}
           <div className="p-6 rounded-2xl glass border border-white/[0.06] text-center text-xs text-zinc-400 space-y-2">
-            <p>&copy; {new Date().getFullYear()} ContentPilot AI Inc. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Content Sync Inc. All rights reserved.</p>
             <div className="flex items-center justify-center gap-4 text-zinc-500 pt-1">
               <Link href="/privacy" className="hover:text-zinc-300 transition">
                 Privacy Policy

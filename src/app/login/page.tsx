@@ -355,7 +355,7 @@ export default function LoginPage() {
           </div>
           <div className="flex flex-col">
             <span className="text-base font-extrabold tracking-tight text-white flex items-center gap-1.5">
-              ContentPilot <span className="gradient-text">AI</span>
+              Content Sync <span className="gradient-text">AI</span>
             </span>
             <span className="text-[10px] text-zinc-400 font-mono">Multi-Workspace Social Engine</span>
           </div>
@@ -376,7 +376,7 @@ export default function LoginPage() {
           fallback={
             <div className="glass p-8 rounded-3xl text-center space-y-4">
               <Loader2 className="w-8 h-8 text-blue-400 animate-spin mx-auto" />
-              <p className="text-xs text-zinc-400">Loading ContentPilot Auth Portal...</p>
+              <p className="text-xs text-zinc-400">Loading Content Sync Auth Portal...</p>
             </div>
           }
         >
@@ -386,7 +386,7 @@ export default function LoginPage() {
 
       {/* Footer */}
       <footer className="relative z-10 p-4 text-center text-xs text-zinc-600 border-t border-white/[0.04]">
-        © 2026 ContentPilot AI. All rights reserved. ·{' '}
+        © 2026 Content Sync Inc. All rights reserved. ·{' '}
         <a href="/privacy" className="hover:text-zinc-400 underline transition">Privacy Policy</a> ·{' '}
         <a href="/terms" className="hover:text-zinc-400 underline transition">Terms of Service</a>
       </footer>

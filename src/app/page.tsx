@@ -85,7 +85,7 @@ export default function Home() {
             </div>
             <div>
               <span className="font-extrabold text-base tracking-tight gradient-text">
-                ContentPilot AI
+                Content Sync
               </span>
               <span className="ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded-full badge-neon-blue uppercase tracking-widest">
                 v2.4
@@ -142,7 +142,7 @@ export default function Home() {
 
           {/* Sub-headline */}
           <p className="text-base sm:text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-10 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            ContentPilot AI scrapes blog posts, transforms URLs into platform-native posts, generates carousel decks & video scripts, and auto-publishes on your schedule - across every major social network.
+            Content Sync scrapes blog posts, transforms URLs into platform-native posts, generates carousel decks & video scripts, and auto-publishes on your schedule — across every major social network.
           </p>
 
           {/* CTAs */}
@@ -151,7 +151,7 @@ export default function Home() {
               href="/dashboard"
               className="group w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 animate-gradient hover:opacity-90 text-white font-bold text-sm shadow-2xl shadow-blue-700/30 transition-all btn-glow flex items-center justify-center gap-3"
             >
-              <span>Open ContentPilot AI</span>
+              <span>Open Content Sync</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
 
@@ -242,37 +242,28 @@ export default function Home() {
             <div className="absolute inset-0 -z-10 flex items-center justify-center pointer-events-none">
               <div className="w-[600px] h-[300px] bg-blue-600/15 rounded-full blur-[100px]" />
             </div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full badge-neon-blue text-xs font-bold mb-6">
-              <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
-              <span>Start free · No credit card required</span>
+            <div className="max-w-4xl mx-auto space-y-6">
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white font-display">
+                Ready to Accelerate Your Social Growth?
+              </h2>
+              <p className="text-sm text-zinc-300 max-w-lg mx-auto">
+                Join 200+ teams already using Content Sync to automate their entire social media workflow.
+              </p>
+
+              <div className="pt-4 flex justify-center">
+                <Link
+                  href="/dashboard"
+                  className="px-8 py-4 rounded-2xl bg-white text-zinc-950 font-extrabold text-sm hover:bg-zinc-100 transition shadow-2xl flex items-center gap-2"
+                >
+                  <span>Launch Content Sync →</span>
+                </Link>
+              </div>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight font-display text-white mb-4">
-              Ready to 10× your content output?
-            </h2>
-            <p className="text-zinc-300 text-sm mb-8 max-w-md mx-auto">
-              Join 200+ teams already using ContentPilot AI to automate their entire social media workflow.
-            </p>
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold shadow-2xl shadow-blue-700/40 transition-all btn-glow"
-            >
-              <span>Launch ContentPilot AI →</span>
-            </Link>
           </div>
         </section>
       </main>
 
       {/* ── Footer ───────────────────────────────────────────── */}
-      <footer className="border-t border-white/[0.06] py-10 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-zinc-500">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-white text-[10px] shadow glow-sm-blue">
-              CP
-            </div>
-            <span className="font-bold text-zinc-300 text-sm">ContentPilot AI</span>
-            <span className="font-mono text-zinc-600">&bull; v2.4.0</span>
-          </div>
-
           <div className="flex flex-wrap items-center gap-6 text-zinc-400">
             {[
               { label: 'Dashboard', href: '/dashboard' },

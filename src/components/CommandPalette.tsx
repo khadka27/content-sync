@@ -168,7 +168,7 @@ export function CommandPalette() {
             </kbd>
             <span>to open palette anytime</span>
           </div>
-          <span>ContentPilot AI v2.4</span>
+          <span>Content Sync v2.4</span>
         </div>
       </div>
     </div>
