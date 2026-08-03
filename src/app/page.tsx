@@ -279,6 +279,7 @@ export default function Home() {
               { label: 'Post Studio', href: '/dashboard/posts' },
               { label: 'Terms & Conditions', href: '/terms' },
               { label: 'Privacy Policy', href: '/privacy' },
+              { label: 'Data Deletion', href: '/data-deletion' },
               { label: 'Settings', href: '/dashboard/settings' },
             ].map((l) => (
               <Link key={l.href} href={l.href} className="hover:text-white transition-colors">

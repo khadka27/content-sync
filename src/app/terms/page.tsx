@@ -247,6 +247,10 @@ If you have any questions or legal inquiries regarding these Terms & Conditions,
               <Link href="/terms" className="hover:text-zinc-300 transition">
                 Terms of Service
               </Link>
+              <span>&bull;</span>
+              <Link href="/data-deletion" className="hover:text-zinc-300 transition">
+                Data Deletion
+              </Link>
             </div>
           </div>
         </section>

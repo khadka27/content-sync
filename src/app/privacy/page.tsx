@@ -238,6 +238,10 @@ By creating an account or accessing our services, you consent to the data collec
               <Link href="/terms" className="hover:text-zinc-300 underline">
                 Terms of Service
               </Link>
+              <span>&bull;</span>
+              <Link href="/data-deletion" className="hover:text-zinc-300 underline">
+                Data Deletion
+              </Link>
             </div>
           </div>
         </section>
