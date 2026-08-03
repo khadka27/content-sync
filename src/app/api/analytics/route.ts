@@ -29,14 +29,14 @@ export async function GET(req: Request) {
     const publishedPosts = posts.filter((p) => p.status === 'PUBLISHED').length;
 
     // Calculate aggregated metrics from social accounts followers & post counts
-    const totalReach = socialAccounts.reduce((acc, s) => acc + s.followers, 0);
+    const totalReach = socialAccounts.reduce((acc: number, s: any) => acc + (s.followers || 0), 0);
     const totalImpressions = publishedPosts * 150 + totalReach * 2;
     const totalClicks = Math.floor(totalImpressions * 0.035);
     const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
 
     // Group breakdown by platform
-    const platformBreakdown = socialAccounts.map((sa) => {
-      const platPosts = posts.filter((p) => (p.platforms as string[]).includes(sa.platform)).length;
+    const platformBreakdown = socialAccounts.map((sa: any) => {
+      const platPosts = posts.filter((p: any) => (p.platforms as string[] || []).includes(sa.platform)).length;
       const impressions = platPosts * 180 + sa.followers * 2;
       const clicks = Math.floor(impressions * 0.04);
       return {

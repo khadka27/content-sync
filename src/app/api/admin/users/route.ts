@@ -12,13 +12,13 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     });
 
-    const formatted = users.map((u) => ({
+    const formatted = users.map((u: any) => ({
       id: u.id,
       name: u.name || 'User',
       email: u.email,
       role: u.role,
-      workspacesCount: u.workspaces.length,
-      createdAt: u.createdAt.toISOString(),
+      workspacesCount: u.workspaces?.length || 0,
+      createdAt: u.createdAt?.toISOString ? u.createdAt.toISOString() : u.createdAt,
     }));
 
     return NextResponse.json({ success: true, data: formatted });

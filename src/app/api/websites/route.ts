@@ -17,9 +17,9 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     });
 
-    const formatted = websites.map((w) => ({
+    const formatted = websites.map((w: any) => ({
       ...w,
-      socialAccountsCount: w.socialAccounts.filter((s) => s.connected).length,
+      socialAccountsCount: w.socialAccounts?.filter((s: any) => s.connected).length || 0,
     }));
 
     return NextResponse.json({

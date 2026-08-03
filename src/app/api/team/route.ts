@@ -18,13 +18,13 @@ export async function GET() {
 
     const list = users.length > 0 ? users : [user];
 
-    const formatted = list.map((u) => ({
+    const formatted = list.map((u: any) => ({
       id: u.id,
       name: u.name || u.email.split('@')[0],
       email: u.email,
       role: u.role,
       status: u.id === user.id ? 'ACTIVE' : 'INVITED',
-      joinedAt: u.createdAt.toISOString().split('T')[0],
+      joinedAt: u.createdAt?.toISOString ? u.createdAt.toISOString().split('T')[0] : String(u.createdAt),
     }));
 
     return NextResponse.json({

@@ -23,7 +23,7 @@ export async function GET(req: Request) {
       orderBy: { createdAt: 'desc' },
     });
 
-    const formatted = posts.map((p) => ({
+    const formatted = posts.map((p: any) => ({
       ...p,
       platforms: p.platforms || [],
       platformCopies: p.platformCopies || {},
