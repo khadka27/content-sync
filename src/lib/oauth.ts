@@ -13,7 +13,7 @@ export interface TikTokTokenResponse {
 
 export function getTikTokAuthUrl(state?: string, customRedirectUri?: string): string {
   const clientKey = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || 'your_tiktok_client_key';
-  const redirectUri = customRedirectUri || process.env.TIKTOK_REDIRECT_URI || 'http://localhost:3000/api/auth/tiktok/callback';
+  const redirectUri = customRedirectUri || process.env.TIKTOK_REDIRECT_URI || 'https://contentsync.dailyworkreport.com/api/auth/tiktok/callback';
   const scope = 'user.info.basic,video.upload,video.publish';
 
   const url = new URL('https://www.tiktok.com/v2/auth/authorize/');
@@ -32,7 +32,7 @@ export async function exchangeTikTokCode(
 ): Promise<TikTokTokenResponse> {
   const clientKey = process.env.TIKTOK_CLIENT_KEY || process.env.NEXT_PUBLIC_TIKTOK_CLIENT_KEY || '';
   const clientSecret = process.env.TIKTOK_CLIENT_SECRET || '';
-  const redirectUri = customRedirectUri || process.env.TIKTOK_REDIRECT_URI || 'http://localhost:3000/api/auth/tiktok/callback';
+  const redirectUri = customRedirectUri || process.env.TIKTOK_REDIRECT_URI || 'https://contentsync.dailyworkreport.com/api/auth/tiktok/callback';
 
   if (!clientKey || clientKey === 'your_tiktok_client_key' || !clientSecret || clientSecret === 'your_tiktok_client_secret') {
     // Return mock response when keys are not configured

@@ -7,7 +7,7 @@ export async function GET(req: Request) {
   const clientId = process.env.LINKEDIN_CLIENT_ID;
   const redirectUri = process.env.NEXTAUTH_URL
     ? `${process.env.NEXTAUTH_URL}/api/auth/linkedin/callback`
-    : 'http://localhost:3000/api/auth/linkedin/callback';
+    : 'https://contentsync.dailyworkreport.com/api/auth/linkedin/callback';
 
   if (!clientId) {
     const demoCallbackUrl = `${redirectUri}?websiteId=${websiteId}&code=demo_linkedin_oauth_${Date.now()}`;

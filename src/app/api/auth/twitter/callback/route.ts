@@ -18,7 +18,7 @@ export async function GET(req: Request) {
 
     const clientId = process.env.TWITTER_CLIENT_ID;
     const clientSecret = process.env.TWITTER_CLIENT_SECRET;
-    const redirectUri = process.env.TWITTER_REDIRECT_URI || 'http://localhost:3000/api/auth/twitter/callback';
+    const redirectUri = process.env.TWITTER_REDIRECT_URI || 'https://contentsync.dailyworkreport.com/api/auth/twitter/callback';
 
     let accessToken = `x_twitter_token_${Date.now()}`;
 

@@ -14,9 +14,10 @@ export async function GET(req: Request) {
   try {
     const clientId = process.env.FACEBOOK_CLIENT_ID;
     const clientSecret = process.env.FACEBOOK_CLIENT_SECRET;
-    const redirectUri = process.env.NEXTAUTH_URL
-      ? `${process.env.NEXTAUTH_URL}/api/auth/facebook/callback`
-      : 'http://localhost:3000/api/auth/facebook/callback';
+    const redirectUri = process.env.FACEBOOK_REDIRECT_URI ||
+      (process.env.NEXTAUTH_URL
+        ? `${process.env.NEXTAUTH_URL}/api/auth/facebook/callback`
+        : 'https://contentsync.dailyworkreport.com/api/auth/facebook/callback');
 
     let accessToken = `fb_access_token_${Date.now()}`;
     let pageName = 'Facebook Business Page';

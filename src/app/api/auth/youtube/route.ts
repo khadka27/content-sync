@@ -7,7 +7,7 @@ export async function GET(req: Request) {
   const clientId = process.env.YOUTUBE_CLIENT_ID;
   const redirectUri = process.env.NEXTAUTH_URL
     ? `${process.env.NEXTAUTH_URL}/api/auth/youtube/callback`
-    : 'http://localhost:3000/api/auth/youtube/callback';
+    : 'https://contentsync.dailyworkreport.com/api/auth/youtube/callback';
 
   if (!clientId) {
     const demoCallbackUrl = `${redirectUri}?websiteId=${websiteId}&code=demo_youtube_oauth_${Date.now()}`;

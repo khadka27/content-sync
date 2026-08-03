@@ -20,7 +20,7 @@ export function ConnectTikTokButton({
     const clientKey = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_KEY || 'your_tiktok_client_key';
     const redirectUri = typeof window !== 'undefined'
       ? `${window.location.origin}/api/auth/tiktok/callback`
-      : 'http://localhost:3000/api/auth/tiktok/callback';
+      : 'https://contentsync.dailyworkreport.com/api/auth/tiktok/callback';
 
     if (!clientKey || clientKey === 'your_tiktok_client_key') {
       // Direct redirect to backend handler which supports demo mode

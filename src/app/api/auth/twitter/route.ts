@@ -8,7 +8,7 @@ export async function GET(req: Request) {
   const redirectUri = process.env.TWITTER_REDIRECT_URI ||
     (process.env.NEXTAUTH_URL
       ? `${process.env.NEXTAUTH_URL}/api/auth/twitter/callback`
-      : 'http://localhost:3000/api/auth/twitter/callback');
+      : 'https://contentsync.dailyworkreport.com/api/auth/twitter/callback');
 
   if (!clientId || clientId === 'your_twitter_client_id') {
     // If credentials are not set, trigger demo authorization callback

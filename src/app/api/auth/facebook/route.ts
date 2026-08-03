@@ -5,9 +5,10 @@ export async function GET(req: Request) {
   const websiteId = searchParams.get('websiteId') || '';
 
   const clientId = process.env.FACEBOOK_CLIENT_ID;
-  const redirectUri = process.env.NEXTAUTH_URL 
-    ? `${process.env.NEXTAUTH_URL}/api/auth/facebook/callback`
-    : 'http://localhost:3000/api/auth/facebook/callback';
+  const redirectUri = process.env.FACEBOOK_REDIRECT_URI ||
+    (process.env.NEXTAUTH_URL 
+      ? `${process.env.NEXTAUTH_URL}/api/auth/facebook/callback`
+      : 'https://contentsync.dailyworkreport.com/api/auth/facebook/callback');
 
   if (!clientId) {
     // If Facebook App Credentials are not configured in .env yet, redirect with demo authorization token

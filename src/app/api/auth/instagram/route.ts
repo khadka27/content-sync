@@ -7,7 +7,7 @@ export async function GET(req: Request) {
   const clientId = process.env.INSTAGRAM_CLIENT_ID;
   const redirectUri = process.env.NEXTAUTH_URL
     ? `${process.env.NEXTAUTH_URL}/api/auth/instagram/callback`
-    : 'http://localhost:3000/api/auth/instagram/callback';
+    : 'https://contentsync.dailyworkreport.com/api/auth/instagram/callback';
 
   if (!clientId) {
     // If credentials are not set, run instant demo authorization callback
