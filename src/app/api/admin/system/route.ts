@@ -44,13 +44,13 @@ export async function GET() {
           nodeVersion: process.version,
           uptimeSeconds: Math.floor(process.uptime()),
         },
-        recentActivity: recentPosts.map((p) => ({
+        recentActivity: recentPosts.map((p: any) => ({
           id: p.id,
           title: p.title,
           websiteName: p.website?.name || 'General',
           status: p.status,
           platforms: p.platforms,
-          createdAt: p.createdAt.toISOString(),
+          createdAt: p.createdAt?.toISOString ? p.createdAt.toISOString() : p.createdAt,
         })),
       },
     });
