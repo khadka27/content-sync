@@ -17,22 +17,7 @@ export function ConnectTikTokButton({
   connected = false,
 }: ConnectTikTokButtonProps) {
   const connectTikTok = () => {
-    const clientKey = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_KEY || 'your_tiktok_client_key';
-    const redirectUri = typeof window !== 'undefined'
-      ? `${window.location.origin}/api/auth/tiktok/callback`
-      : 'https://contentsync.dailyworkreport.com/api/auth/tiktok/callback';
-
-    if (!clientKey || clientKey === 'your_tiktok_client_key') {
-      // Direct redirect to backend handler which supports demo mode
-      window.location.href = `/api/auth/tiktok?websiteId=${encodeURIComponent(websiteId || 'default')}`;
-      return;
-    }
-
-    const redirect = encodeURIComponent(redirectUri);
-    const scope = encodeURIComponent('user.info.basic,video.upload,video.publish');
-    const state = websiteId || (typeof crypto !== 'undefined' ? crypto.randomUUID() : 'default');
-
-    window.location.href = `https://www.tiktok.com/v2/auth/authorize/?client_key=${clientKey}&response_type=code&scope=${scope}&redirect_uri=${redirect}&state=${state}`;
+    window.location.href = `/api/auth/tiktok?websiteId=${encodeURIComponent(websiteId || 'default')}`;
   };
 
   if (variant === 'compact') {

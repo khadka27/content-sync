@@ -12,7 +12,7 @@ export interface TikTokTokenResponse {
 }
 
 export function getTikTokAuthUrl(state?: string, customRedirectUri?: string): string {
-  const clientKey = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY || 'your_tiktok_client_key';
+  const clientKey = process.env.TIKTOK_CLIENT_KEY || process.env.NEXT_PUBLIC_TIKTOK_CLIENT_KEY || 'your_tiktok_client_key';
   const redirectUri = customRedirectUri || process.env.TIKTOK_REDIRECT_URI || 'https://contentsync.dailyworkreport.com/api/auth/tiktok/callback';
   const scope = 'user.info.basic,video.upload,video.publish';
 
